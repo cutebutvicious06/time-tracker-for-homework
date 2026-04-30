@@ -9,9 +9,11 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#f5f0e8" />
   <title>Venato Study</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  
+  //fonts.googleapis.com" />
+  //fonts.gstatic.com" crossorigin />
+  //fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  
   <style>
     :root {
       --font-display: "Playfair Display", Georgia, serif;
@@ -26,11 +28,28 @@
       --color-text-muted: #6b5d4e;
       --color-text-faint: #a89880;
       --color-primary: #3d6b4f;
+      --color-primary-hover: #2e5239;
       --color-primary-highlight: #d4e3da;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.14);
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
     body {
       min-height: 100dvh;
       max-width: 480px;
@@ -39,237 +58,372 @@
       color: var(--color-text);
       font-family: var(--font-body);
       padding-top: var(--safe-top);
-      padding-bottom: var(--safe-bottom);
+      padding-bottom: calc(72px + var(--safe-bottom));
       display: flex;
       flex-direction: column;
     }
+
     header {
-      padding: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--color-bg);
       border-bottom: 1px solid var(--color-divider);
+      padding: 0.85rem 1.25rem;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
     }
-    .logo { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; }
-    main { flex: 1; padding: 1rem; overflow-y: auto; }
-    .timer-container {
+
+    .logo {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .date-label {
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+      font-style: italic;
+    }
+
+    main {
+      flex: 1;
+      padding: 1.25rem;
+      overflow-y: auto;
+    }
+
+    .page-title {
+      font-family: var(--font-display);
+      font-size: 1.55rem;
+      font-weight: 700;
+      margin-bottom: 0.15rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      font-style: italic;
+      margin-bottom: 1.3rem;
+    }
+
+    .card {
       background: var(--color-surface);
       border: 1px solid var(--color-border);
-      border-radius: 1rem;
-      padding: 2rem;
-      text-align: center;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+      padding: 1.5rem;
       margin-bottom: 1rem;
     }
-    .timer-display { font-family: var(--font-display); font-size: 3rem; margin: 1rem 0; }
-    .btn-row { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1rem; }
+
+    .timer-display {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      text-align: center;
+      margin: 1.5rem 0;
+      letter-spacing: 0.06em;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
     button {
-      padding: 0.5rem 1rem;
+      padding: 0.65rem 1rem;
       border-radius: 2rem;
-      border: 1px solid var(--color-border);
+      border: 1.5px solid var(--color-border);
       background: var(--color-surface-2);
+      font-family: var(--font-body);
       font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      transition: all 160ms ease;
+    }
+
+    button:hover {
+      background: var(--color-surface-offset);
+    }
+
+    button.primary {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+
+    button.primary:hover {
+      background: var(--color-primary-hover);
+    }
+
+    .slider-container {
+      margin: 1.5rem 0;
+      padding: 0.75rem;
+      background: var(--color-surface-offset);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+    }
+
+    .slider-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: #e2d7c7;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      border: 3px solid white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       cursor: pointer;
     }
-    button.primary { background: var(--color-primary); color: white; border-color: var(--color-primary); }
-    .slider-container { margin: 1rem 0; }
-    input[type="range"] { width: 100%; }
-    .productivity-rating { display: none; margin-top: 1rem; }
-    .stats-container, .projects-container, .history-container { display: none; }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      border: 3px solid white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+
+    .rating-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--color-surface-2);
+      border: 2px solid var(--color-primary);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      z-index: 1000;
+      max-width: 90%;
+      text-align: center;
+    }
+
+    .rating-modal h3 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .rating-buttons {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    .rating-buttons button {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+    }
+
+    .project-card {
+      background: var(--color-surface-2);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      transition: all 160ms ease;
+    }
+
+    .project-card:hover {
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .project-card.active {
+      border-color: var(--color-primary);
+      background: var(--color-primary-highlight);
+    }
+
+    .session-item {
+      border-bottom: 1px solid var(--color-divider);
+      padding: 0.75rem 0;
+    }
+
+    .session-item:last-child {
+      border-bottom: none;
+    }
+
     nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: 480px;
+      margin: 0 auto;
       display: flex;
       justify-content: space-around;
       padding: 1rem;
+      padding-bottom: calc(1rem + var(--safe-bottom));
       border-top: 1px solid var(--color-divider);
       background: var(--color-surface);
     }
-    nav div { cursor: pointer; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+
+    nav button {
+      font-size: 0.7rem;
+      padding: 0.5rem 0.75rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 0.65rem;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-surface-2);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--color-divider);
+    }
+
+    .stat-row:last-child {
+      border-bottom: none;
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--color-primary);
+    }
   </style>
 </head>
 <body>
   <header>
     <div class="logo">Venato Study</div>
-    <div id="date"></div>
+    <div class="date-label" id="header-date"></div>
   </header>
-  <main id="app-content">
-    <div id="view-today">
-      <h1 style="font-family: var(--font-display); margin-bottom: 0.5rem;">Today</h1>
-      <div class="timer-container">
-        <div id="active-project-name">No Active Project</div>
-        <div class="timer-display" id="timer">00:00:00</div>
-        <div class="btn-row">
-          <button id="start-btn" class="primary">Start Session</button>
-          <button id="manual-btn">Manual Log</button>
-        </div>
-        <div class="slider-container">
-          <label>Slide to finish and rate</label>
-          <input type="range" id="finish-slider" min="0" max="100" value="0">
-        </div>
-      </div>
-      <div id="rating-modal" style="display:none; background: var(--color-surface-2); border: 1px solid var(--color-border); padding: 1rem; border-radius: 1rem;">
-        <p>How productive was this session?</p>
-        <div class="btn-row">
-          <button class="rate-btn" data-val="1">1</button>
-          <button class="rate-btn" data-val="2">2</button>
-          <button class="rate-btn" data-val="3">3</button>
-          <button class="rate-btn" data-val="4">4</button>
-          <button class="rate-btn" data-val="5">5</button>
-        </div>
-      </div>
-    </div>
-    <div id="view-projects" style="display:none;">
-      <h1>Projects</h1>
-      <button id="new-project-btn">+ New Project</button>
-      <div id="project-list"></div>
-    </div>
-    <div id="view-history" style="display:none;">
-      <h1>History</h1>
-      <div id="history-list"></div>
-    </div>
-    <div id="view-stats" style="display:none;">
-      <h1>Stats</h1>
-      <div id="stats-summary"></div>
-      <button id="export-json">Export JSON</button>
-    </div>
-  </main>
+
+  <main id="app-content"></main>
+
   <nav>
-    <div onclick="showView('today')">Today</div>
-    <div onclick="showView('history')">History</div>
-    <div onclick="showView('stats')">Stats</div>
-    <div onclick="showView('projects')">Projects</div>
+    <button onclick="showView('today')">Today</button>
+    <button onclick="showView('history')">History</button>
+    <button onclick="showView('stats')">Stats</button>
+    <button onclick="showView('projects')">Projects</button>
   </nav>
+
   <script>
-    let timerInterval;
-    let seconds = 0;
+    // State management
+    let timerInterval = null;
+    let timerSeconds = 0;
     let activeProject = null;
     let sessions = JSON.parse(localStorage.getItem('venato_sessions') || '[]');
     let projects = JSON.parse(localStorage.getItem('venato_projects') || '[]');
+    let currentView = 'today';
 
-    document.getElementById('date').innerText = new Date().toLocaleDateString();
-
-    function showView(view) {
-      ['today', 'projects', 'history', 'stats'].forEach(v => {
-        document.getElementById('view-' + v).style.display = (v === view) ? 'block' : 'none';
-      });
-      if(view === 'history') renderHistory();
-      if(view === 'projects') renderProjects();
-      if(view === 'stats') renderStats();
-    }
-
-    document.getElementById('start-btn').onclick = function() {
-      if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-        this.innerText = 'Resume Session';
-      } else {
-        timerInterval = setInterval(() => {
-          seconds++;
-          updateTimerDisplay();
-        }, 1000);
-        this.innerText = 'Pause Session';
-      }
-    };
-
-    function updateTimerDisplay() {
-      let hrs = Math.floor(seconds / 3600);
-      let mins = Math.floor((seconds % 3600) / 60);
-      let secs = seconds % 60;
-      document.getElementById('timer').innerText = 
-        String(hrs).padStart(2, '0') + ':' + 
-        String(mins).padStart(2, '0') + ':' + 
-        String(secs).padStart(2, '0');
-    }
-
-    document.getElementById('finish-slider').oninput = function() {
-      if (this.value == 100) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-        document.getElementById('rating-modal').style.display = 'block';
-        this.value = 0;
-      }
-    };
-
-    document.querySelectorAll('.rate-btn').forEach(btn => {
-      btn.onclick = function() {
-        let rating = this.getAttribute('data-val');
-        saveSession(rating);
-        document.getElementById('rating-modal').style.display = 'none';
-        seconds = 0;
-        updateTimerDisplay();
-        document.getElementById('start-btn').innerText = 'Start Session';
-        alert('Session Saved!');
-      };
+    // Initialize
+    document.getElementById('header-date').textContent = new Date().toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric'
     });
 
-    function saveSession(rating) {
-      let session = {
-        project: activeProject ? activeProject.name : 'Unlabeled',
-        duration: seconds,
-        rating: rating,
-        date: new Date().toISOString()
-      };
-      sessions.push(session);
-      localStorage.setItem('venato_sessions', JSON.stringify(sessions));
-    }
-
-    function renderHistory() {
-      const list = document.getElementById('history-list');
-      list.innerHTML = sessions.map(s => `
-        <div style="border-bottom: 1px solid #ccc; padding: 0.5rem;">
-          <strong>${s.project}</strong> - ${Math.floor(s.duration/60)}m - Rating: ${s.rating}
-          <div style="font-size:0.7rem;">${new Date(s.date).toLocaleString()}</div>
-        </div>
-      `).join('');
-    }
-
-    function renderProjects() {
-      const list = document.getElementById('project-list');
-      list.innerHTML = projects.map(p => `
-        <div onclick="setActiveProject('${p.name}')" style="padding: 1rem; border: 1px solid #ccc; margin: 0.5rem 0; border-radius: 0.5rem; cursor:pointer; background: ${activeProject && activeProject.name === p.name ? '#d4e3da' : 'white'}">
-          ${p.name} (${p.subject})
-        </div>
-      `).join('');
-    }
-
-    window.setActiveProject = function(name) {
-      activeProject = projects.find(p => p.name === name);
-      document.getElementById('active-project-name').innerText = activeProject.name;
-      showView('today');
-    };
-
-    document.getElementById('new-project-btn').onclick = function() {
-      let name = prompt('Project Name:');
-      let subject = prompt('Subject:');
-      if (name && subject) {
-        projects.push({name, subject});
-        localStorage.setItem('venato_projects', JSON.stringify(projects));
-        renderProjects();
+    // View management
+    function showView(view) {
+      currentView = view;
+      const content = document.getElementById('app-content');
+      
+      if (view === 'today') {
+        renderTodayView(content);
+      } else if (view === 'projects') {
+        renderProjectsView(content);
+      } else if (view === 'history') {
+        renderHistoryView(content);
+      } else if (view === 'stats') {
+        renderStatsView(content);
       }
-    };
-
-    function renderStats() {
-      let totalSeconds = sessions.reduce((acc, s) => acc + s.duration, 0);
-      let avgRating = (sessions.reduce((acc, s) => acc + parseInt(s.rating), 0) / (sessions.length || 1)).toFixed(1);
-      document.getElementById('stats-summary').innerHTML = `
-        <p>Total Study Time: ${Math.floor(totalSeconds / 60)} minutes</p>
-        <p>Average Productivity: ${avgRating} / 5</p>
-        <p>Sessions Completed: ${sessions.length}</p>
-      `;
     }
 
-    document.getElementById('export-json').onclick = function() {
-      let data = {
-        sessions: sessions,
-        projects: projects,
-        exportedAt: new Date().toISOString(),
-        venatoPoints: sessions.reduce((acc, s) => acc + (s.duration / 60) * s.rating, 0).toFixed(0)
-      };
-      let blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-      let url = URL.createObjectURL(blob);
-      let a = document.createElement('a');
-      a.href = url;
-      a.download = 'venato_study_export.json';
-      a.click();
-    };
-  </script>
-</body>
-</html>
+    // TODAY VIEW
+    function renderTodayView(container) {
+      const projectName = activeProject ? activeProject.name : 'No Active Project';
+      
+      container.innerHTML = `
+        <h1 class="page-title">Today</h1>
+        <p class="page-subtitle">Track focused homework sessions</p>
+        
+        <div class="card">
+          <div style="text-align: center; margin-bottom: 1rem;">
+            <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--color-text-muted);">Current Project</div>
+            <div style="font-family: var(--font-display); font-size: 1.3rem; margin-top: 0.25rem;">${projectName}</div>
+          </div>
+          
+          <div class="timer-display" id="timer-display">00:00:00</div>
+          
+          <div class="btn-row">
+            <button class="primary" id="start-btn" style="flex: 1;">Start Session</button>
+            <button id="reset-btn">Reset</button>
+          </div>
+          
+          <div class="slider-container">
+            abel class="slider-label">Slide to finish and rate</label>
+            <input type="range" id="finish-slider" min="0" max="100" value="0">
+          </div>
+        </div>
+      `;
+
+      // Update timer display
+      updateTimerDisplay();
+
+      // Start/Pause button
+      document.getElementById('start-btn').onclick = function() {
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          this.textContent = 'Resume';
+          this.classList.remove('primary');
+        } else {
+          timerInterval = setInterval(() => {
+            timerSeconds++;
+            updateTimerDisplay();
+          }, 1000);
+          this.textContent = 'Pause';
+          this.classList.add('primary');
