@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Venato Study" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#f5f0e8" />
+  <title>Venato Study</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --font-display: "Playfair Display", Georgia, serif;
+      --font-body: "Lato", -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
+
+      --color-bg: #f5f0e8;
+      --color-surface: #f9f6ef;
+      --color-surface-2: #fdfbf7;
+      --color-surface-offset: #ede6d8;
+      --color-border: #ccc3b0;
+      --color-divider: #d9d0c0;
+      --color-text: #2c241a;
+      --color-text-muted: #6b5d4e;
+      --color-text-faint: #a89880;
+      --color-primary: #3d6b4f;
+      --color-primary-hover: #2e5239;
+      --color-primary-highlight: #d4e3da;
+      --color-accent: #8b3a3a;
+
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.14);
+
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100dvh;
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding-top: var(--safe-top);
+      padding-bottom: var(--safe-bottom);
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+      border: none;
+      background: none;
+      cursor: pointer;
+    }
+
+    input, select {
+      font: inherit;
+      color: inherit;
+    }
+
+    /* Header */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-divider);
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .app-logo {
+      display: flex;
+      flex-direction: column;
+      gap: 0.05rem;
+    }
+
+    .app-logo-main {
+      display: flex;
+      align-items: baseline;
+      gap: 0.35rem;
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .app-logo-main span {
+      color: var(--color-text);
+    }
+
+    .app-logo-main small {
+      font-size: 0.7rem;
+      font-weight: 400;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    .header-sub {
+      font-size: 0.68rem;
+      color: var(--color-text-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .date-label {
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+      font-style: italic;
+    }
+
+    main {
+      padding: 1.25rem 1.25rem calc(1.25rem + var(--safe-bottom));
+    }
+
+    .page-title {
+      font-family: var(--font-display);
+      font-size: 1.55rem;
+      font-weight: 700;
+      margin-bottom: 0.15rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      font-style: italic;
+      margin-bottom: 1.3rem;
+    }
+
+    /* Layout sections */
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .section-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--color-text-faint);
+      font-weight: 700;
+    }
+
+    /* Hero card */
+    .hero-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+      padding: 0.9rem 0.9rem 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .hero-top {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .timer-shell {
+      flex-shrink: 0;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 20%, #ffffff, #ede6d8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+      position: relative;
+    }
+
+    .timer-inner {
+      width: 108px;
+      height: 108px;
+      border-radius: 50%;
+      border: 2px solid var(--color-primary-highlight);
+      background: var(--color-surface-2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.12rem;
+      text-align: center;
+      padding: 0.3rem;
+    }
+
+    .timer-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--color-text-muted);
+    }
+
+    .timer-display {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+
+    .timer-note {
+      font-size: 0.7rem;
+      color: var(--color-text-muted);
+      max-width: 8.5rem;
+    }
+
+    .hero-meta {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .hero-meta h2 {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+    }
+
+    .hero-meta p {
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+    }
+
+    .hero-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+
+    .meta-pill {
+      padding: 0.12rem 0.5rem;
+      border-radius: 999px;
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      font-size: 0.7rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Controls */
+    .controls-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .field-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+
+    .field-row label {
+      min-width: 3.2rem;
+      color: var(--color-text-muted);
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .field-row select,
+    .field-row input[type="text"] {
+      flex: 1;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--color-border);
+      padding: 0.4rem 0.5rem;
+      background: var(--color-surface-2);
+      color: var(--color-text);
+    }
+
+    .difficulty-group {
+      display: inline-flex;
+      gap: 0.3rem;
+      background: var(--color-surface-2);
+      padding: 0.18rem;
+      border-radius: 999px;
+      border: 1px solid var(--color-border);
+    }
+
+    .difficulty-pill {
+      padding: 0.18rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+      background: transparent;
+    }
+
+    .difficulty-pill.active {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    /* Timer buttons */
+    .timer-btn-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.1rem;
+    }
+
+    .timer-btn {
+      flex: 1;
+      border-radius: 999px;
+      padding: 0.55rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--color-surface-2);
+      border: 1.5px solid var(--color-border);
+      color: var(--color-text-muted);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      transition: background 150ms ease, border-color 150ms ease,
+        color 150ms ease, transform 80ms ease, box-shadow 80ms ease;
+    }
+
+    .timer-btn.primary {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: white;
+    }
+
+    .timer-btn:active {
+      transform: translateY(1px);
+      box-shadow: none;
+    }
+
+    /* Points + log */
+    .points-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      margin-top: 0.6rem;
+    }
+
+    .points-info {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+    }
+
+    .points-info strong {
+      font-family: var(--font-display);
+      font-size: 1.0rem;
+      color: var(--color-primary);
+    }
+
+    .log-btn {
+      border-radius: 999px;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--color-primary-highlight);
+      border: 1.5px solid var(--color-primary);
+      color: var(--color-primary);
+      box-shadow: var(--shadow-sm);
+      white-space: nowrap;
+    }
+
+    /* Slider (session length) */
+    .slider-wrap {
+      margin-top: 0.65rem;
+      padding: 0.6rem 0.7rem 0.4rem;
+      border-radius: var(--radius-lg);
+      background: rgba(237, 230, 216, 0.85);
+      border: 1px solid var(--color-surface-offset);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slider-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.3rem;
+    }
+
+    .slider-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-muted);
+      font-weight: 700;
+    }
+
+    .slider-value {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      color: var(--color-primary);
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .slider-row input[type="range"] {
+      flex: 1;
+      appearance: none;
+      -webkit-appearance: none;
+      height: 6px;
+      border-radius: 999px;
+      background: #e2d7c7;
+      outline: none;
+    }
+
+    .slider-row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      border: 2px solid #fdfbf7;
+      box-shadow: 0 0 0 2px rgba(61, 107, 79, 0.3);
+      cursor: pointer;
+    }
+
+    .slider-row input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      border: 2px solid #fdfbf7;
+      box-shadow: 0 0 0 2px rgba(61, 107, 79, 0.3);
+      cursor: pointer;
+    }
+
+    .slider-note {
+      margin-top: 0.25rem;
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Summary + export */
+    .summary-card {
+      background: var(--color-surface-2);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      padding: 0.8rem 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.8rem;
+    }
+
+    .summary-row strong {
+      font-family: var(--font-display);
+      font-size: 1.0rem;
+      color: var(--color-primary);
+    }
+
+    .summary-caption {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    .export-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.3rem;
+    }
+
+    .export-btn {
+      flex: 1;
+      border-radius: 999px;
+      padding: 0.5rem 0.6rem;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: transparent;
+      border: 1.5px solid var(--color-border);
+      color: var(--color-text-muted);
+    }
+
+    .export-btn.primary {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #fff;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: calc(1.1rem + var(--safe-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--color-text);
+      color: #fdfbf7;
+      padding: 0.5rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      box-shadow: var(--shadow-md);
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-4px);
+      pointer-events: auto;
+    }
+
+    @media (max-width: 380px) {
+      .timer-shell {
+        width: 128px;
+        height: 128px;
+      }
+      .timer-inner {
+        width: 100px;
+        height: 100px;
+      }
+      .hero-top {
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-logo">
+      <div class="app-logo-main">
+        <span>Venato</span>
+        <small>Study</small>
+      </div>
+      <div class="header-sub">Homework tracker</div>
+    </div>
+    <div class="date-label" id="header-date"></div>
+  </header>
+
+  <main>
+    <h1 class="page-title">Today</h1>
+    <p class="page-subtitle">
+      Keep score on focused homework blocks, then export your points to Venato.
+    </p>
+
+    <div class="stack">
+      <!-- Hero: timer + course + difficulty -->
+      <section class="hero-card">
+        <div class="hero-top">
+          <div class="timer-shell">
+            <div class="timer-inner">
+              <div class="timer-label">Focus timer</div>
+              <div class="timer-display" id="timer-display">25:00</div>
+              <div class="timer-note" id="timer-note">
+                Ready for a 25‑minute Pomodoro.
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-meta">
+            <h2>Homework block</h2>
+            <p id="hero-description">
+              Pick a class, choose difficulty, and let Venato Study assign points.
+            </p>
+            <div class="hero-meta-row">
+              <span class="meta-pill" id="meta-course-pill">No course selected</span>
+              <span class="meta-pill" id="meta-diff-pill">Medium · 2×</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <div class="field-row">
+            <label for="course-input">Course</label>
+            <input type="text" id="course-input" placeholder="e.g., Calc II, Bible, English" />
+          </div>
+
+          <div class="field-row">
+            <label>Difficulty</label>
+            <div class="difficulty-group" id="difficulty-group">
+              <button type="button"
+                      class="difficulty-pill"
+                      data-diff="easy"
+                      data-multiplier="1">
+                Easy
+              </button>
+              <button type="button"
+                      class="difficulty-pill active"
+                      data-diff="medium"
+                      data-multiplier="2">
+                Medium
+              </button>
+              <button type="button"
+                      class="difficulty-pill"
+                      data-diff="hard"
+                      data-multiplier="3">
+                Hard
+              </button>
+            </div>
+          </div>
+
+          <div class="timer-btn-row">
+            <button class="timer-btn primary" id="btn-start-pause">
+              ▶ Start
+            </button>
+            <button class="timer-btn" id="btn-reset">
+              ↻ Reset
+            </button>
+          </div>
+
+          <div class="slider-wrap">
+            <div class="slider-label-row">
+              <span class="slider-label">Session length</span>
+              <span class="slider-value" id="slider-minutes-label">25 min</span>
+            </div>
+            <div class="slider-row">
+              <input type="range"
+                     id="minutes-slider"
+                     min="5"
+                     max="120"
+                     step="5"
+                     value="25" />
+            </div>
+            <div class="slider-note">
+              The timer always matches this slider. Adjust before starting.
+            </div>
+          </div>
+
+          <div class="points-row">
+            <div class="points-info">
+              This block will earn
+              <strong id="points-preview">50</strong>
+              points.
+            </div>
+            <button class="log-btn" id="btn-log-session">
+              + Log session
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Summary + export -->
+      <section>
+        <div class="section-label">Points so far</div>
+        <div class="summary-card" id="summary-card">
+          <div class="summary-row">
+            <span>Today</span>
+            <strong id="today-points">0</strong>
+          </div>
+          <div class="summary-row">
+            <span>This week</span>
+            <strong id="week-points">0</strong>
+          </div>
+          <p class="summary-caption">
+            Sessions are saved on this device only. Export regularly and import into Venato.
+          </p>
+          <div class="export-row">
+            <button class="export-btn primary" id="btn-export-json">
+              ⭳ Export JSON for Venato
+            </button>
+            <button class="export-btn" id="btn-clear-data">
+              Clear local data
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // --- State and helpers -------------------------------------------------
+
+    const STORAGE_KEY = "venatoStudySessions.v1";
+
+    function todayKey() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function weekKey(date = new Date()) {
+      // ISO week: we just group by "year-weekNumber" for display.
+      const d = new Date(date);
+      d.setHours(0, 0, 0, 0);
+      // Thursday trick
+      d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+      const week1 = new Date(d.getFullYear(), 0, 4);
+      const weekNo =
+        1 +
+        Math.round(
+          ((d.getTime() - week1.getTime()) / 86400000 -
+            3 +
+            ((week1.getDay() + 6) % 7)) /
+            7
+        );
+      return `${d.getFullYear()}-W${String(weekNo).padStart(2, "0")}`;
+    }
+
+    function loadSessions() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveSessions(sessions) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    function sumPointsForDate(sessions, key) {
+      return sessions
+        .filter((s) => s.date === key)
+        .reduce((acc, s) => acc + (s.points || 0), 0);
+    }
+
+    function sumPointsForWeek(sessions, wkKey) {
+      return sessions
+        .filter((s) => s.weekKey === wkKey)
+        .reduce((acc, s) => acc + (s.points || 0), 0);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast._timeout);
+      showToast._timeout = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2800);
+    }
+
+    // --- Header date -------------------------------------------------------
+
+    function renderHeaderDate() {
+      const el = document.getElementById("header-date");
+      const now = new Date();
+      el.textContent = now.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+      });
+    }
+
+    // --- Timer + slider ----------------------------------------------------
+
+    let timerSeconds = 25 * 60;
+    let timerInterval = null;
+    let timerRunning = false;
+
+    const timerDisplayEl = document.getElementById("timer-display");
+    const timerNoteEl = document.getElementById("timer-note");
+    const startPauseBtn = document.getElementById("btn-start-pause");
+    const resetBtn = document.getElementById("btn-reset");
+    const minutesSlider = document.getElementById("minutes-slider");
+    const sliderLabel = document.getElementById("slider-minutes-label");
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+
+    function syncTimerToSlider() {
+      const minutes = parseInt(minutesSlider.value, 10) || 25;
+      timerSeconds = minutes * 60;
+      timerDisplayEl.textContent = formatTime(timerSeconds);
+      sliderLabel.textContent = `${minutes} min`;
+      timerNoteEl.textContent = `Ready for a ${minutes}-minute block.`;
+      updatePointsPreview();
+    }
+
+    function startTimer() {
+      if (timerRunning) return;
+      timerRunning = true;
+      startPauseBtn.textContent = "⏸ Pause";
+      startPauseBtn.classList.add("primary");
+      timerInterval = setInterval(() => {
+        timerSeconds -= 1;
+        if (timerSeconds <= 0) {
+          timerSeconds = 0;
+          timerDisplayEl.textContent = formatTime(timerSeconds);
+          pauseTimer();
+          showToast("Timer complete. Log your session to save points.");
+          return;
+        }
+        timerDisplayEl.textContent = formatTime(timerSeconds);
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      timerRunning = false;
+      startPauseBtn.textContent = "▶ Start";
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      syncTimerToSlider();
+    }
+
+    startPauseBtn.addEventListener("click", () => {
+      if (!timerRunning) {
+        startTimer();
+      } else {
+        pauseTimer();
+      }
+    });
+
+    resetBtn.addEventListener("click", resetTimer);
+
+    minutesSlider.addEventListener("input", () => {
+      const wasRunning = timerRunning;
+      if (wasRunning) pauseTimer();
+      syncTimerToSlider();
+    });
+
+    // --- Difficulty + course + points preview -----------------------------
+
+    const diffGroup = document.getElementById("difficulty-group");
+    const diffPills = Array.from(
+      diffGroup.querySelectorAll(".difficulty-pill")
+    );
+    const metaDiffPill = document.getElementById("meta-diff-pill");
+    const courseInput = document.getElementById("course-input");
+    const metaCoursePill = document.getElementById("meta-course-pill");
+    const pointsPreviewEl = document.getElementById("points-preview");
+
+    let currentDifficulty = "medium";
+    let currentMultiplier = 2;
+
+    diffPills.forEach((pill) => {
+      pill.addEventListener("click", () => {
+        diffPills.forEach((p) => p.classList.remove("active"));
+        pill.classList.add("active");
+        currentDifficulty = pill.dataset.diff;
+        currentMultiplier = parseInt(pill.dataset.multiplier, 10) || 1;
+        const label =
+          currentDifficulty.charAt(0).toUpperCase() +
+          currentDifficulty.slice(1);
+        metaDiffPill.textContent = `${label} · ${currentMultiplier}×`;
+        updatePointsPreview();
+      });
+    });
+
+    courseInput.addEventListener("input", () => {
+      const v = courseInput.value.trim();
+      metaCoursePill.textContent = v || "No course selected";
+    });
+
+    function currentMinutesFromSlider() {
+      return parseInt(minutesSlider.value, 10) || 25;
+    }
+
+    function updatePointsPreview() {
+      const minutes = currentMinutesFromSlider();
+      const pts = minutes * currentMultiplier;
+      pointsPreviewEl.textContent = pts.toString();
+    }
+
+    // --- Logging sessions --------------------------------------------------
+
+    const logSessionBtn = document.getElementById("btn-log-session");
+    const todayPointsEl = document.getElementById("today-points");
+    const weekPointsEl = document.getElementById("week-points");
+
+    function refreshSummary() {
+      const sessions = loadSessions();
+      const today = todayKey();
+      const wk = weekKey(new Date());
+      const todayTotal = sumPointsForDate(sessions, today);
+      const weekTotal = sumPointsForWeek(sessions, wk);
+      todayPointsEl.textContent = todayTotal.toString();
+      weekPointsEl.textContent = weekTotal.toString();
+    }
+
+    logSessionBtn.addEventListener("click", () => {
+      const minutes = currentMinutesFromSlider();
+      const course = courseInput.value.trim() || null;
+      const pts = minutes * currentMultiplier;
+      const now = new Date();
+
+      const session = {
+        version: 1,
+        source: "study-log",
+        date: todayKey(),
+        weekKey: weekKey(now),
+        timestamp: now.toISOString(),
+        course,
+        minutes,
+        difficulty: currentDifficulty,
+        multiplier: currentMultiplier,
+        points: pts,
+      };
+
+      const sessions = loadSessions();
+      sessions.push(session);
+      saveSessions(sessions);
+      refreshSummary();
+      showToast(`Logged ${pts} points${course ? " for " + course : ""}.`);
+    });
+
+    // --- Export JSON -------------------------------------------------------
+
+    const exportBtn = document.getElementById("btn-export-json");
+    const clearBtn = document.getElementById("btn-clear-data");
+
+    function buildExportPayload() {
+      const sessions = loadSessions();
+      const totalsByDate = sessions.reduce((acc, s) => {
+        if (!s.date) return acc;
+        acc[s.date] = (acc[s.date] || 0) + (s.points || 0);
+        return acc;
+      }, {});
+      return {
+        version: 1,
+        source: "study-log",
+        exportedAt: new Date().toISOString(),
+        sessions,
+        totalsByDate,
+      };
+    }
+
+    function downloadJson(filename, dataObj) {
+      const blob = new Blob([JSON.stringify(dataObj, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    exportBtn.addEventListener("click", () => {
+      const payload = buildExportPayload();
+      const today = todayKey();
+      const fileName = `venato-study-export-${today}.json`;
+      downloadJson(fileName, payload);
+      showToast("Exported JSON for Venato.");
+    });
+
+    clearBtn.addEventListener("click", () => {
+      if (!confirm("Clear all local study sessions? This cannot be undone.")) {
+        return;
+      }
+      saveSessions([]);
+      refreshSummary();
+      showToast("Local data cleared.");
+    });
+
+    // --- Init --------------------------------------------------------------
+
+    renderHeaderDate();
+    syncTimerToSlider();
+    refreshSummary();
+  </script>
+</body>
+</html>
