@@ -2,330 +2,291 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>Study Log</title>
-
-<!-- ✅ PWA Fix 1: Apple standalone mode -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#f5f0e8"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
+<!-- ✅ FIX 1: black-translucent makes it truly fullscreen/standalone like Venato -->
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Study Log"/>
-<meta name="theme-color" content="#f5f0e8"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<title>Study Log</title>
 
-<!-- ✅ PWA Fix 2: Apple touch icon (inline SVG → base64 PNG via canvas trick not needed — use SVG data URI) -->
-/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%233d6b4f'/%3E%3Ctext x='90' y='120' font-size='90' text-anchor='middle' fill='%23f5f0e8'%3E%F0%9F%93%96%3C/text%3E%3C/svg%3E"/>
-
-<!-- ✅ PWA Fix 3: Proper manifest (not data: URI which Safari ignores) -->
+<!-- ✅ FIX 2: Blob-URL manifest — Safari ignores data: URI manifests entirely -->
 <script>
-// Inject manifest as blob URL so Safari actually reads it
 (function(){
-  var m = {
-    name:"Study Log",short_name:"Study Log",
-    start_url:".",display:"standalone",
-    background_color:"#f5f0e8",theme_color:"#f5f0e8",
-    icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%233d6b4f'/%3E%3Ctext x='96' y='130' font-size='100' text-anchor='middle' fill='%23f5f0e8'%3E%F0%9F%93%96%3C/text%3E%3C/svg%3E",sizes:"192x192",type:"image/svg+xml"}]
-  };
-  var blob = new Blob([JSON.stringify(m)],{type:'application/manifest+json'});
-  var url  = URL.createObjectURL(blob);
-  var l    = document.createElement('link');
-  l.rel='manifest'; l.href=url;
-  document.head.appendChild(l);
+  try {
+    var m = {
+      name: "Study Log",
+      short_name: "Study Log",
+      start_url: ".",
+      display: "standalone",
+      background_color: "#f5f0e8",
+      theme_color: "#f5f0e8",
+      orientation: "portrait"
+    };
+    var blob = new Blob([JSON.stringify(m)], {type: 'application/manifest+json'});
+    var url  = URL.createObjectURL(blob);
+    var link = document.createElement('link');
+    link.rel  = 'manifest';
+    link.href = url;
+    document.head.appendChild(link);
+  } catch(e) {}
 })();
 </script>
 
 //fonts.googleapis.com"/>
 //fonts.gstatic.com" crossorigin/>
-//fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
-
+//fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{
-  --bg:#f5f0e8;--card:#f9f6ef;--green:#3d6b4f;--green-light:#e8f0ea;
-  --text:#2c2c2c;--muted:#7a7a6e;--border:#e0d8c8;--radius:0.85rem;
-  --shadow:0 4px 12px rgba(0,0,0,0.10);
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bot: env(safe-area-inset-bottom, 0px);
-}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Lato',sans-serif}
-body{display:flex;flex-direction:column;align-items:center}
+  :root {
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Lato', 'Helvetica Neue', sans-serif;
+    --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+    --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+    --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+    --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+    --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.1rem);
+    --space-1: .25rem; --space-2: .5rem; --space-3: .75rem; --space-4: 1rem;
+    --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem;
+    --space-10: 2.5rem; --space-12: 3rem;
+    --color-bg: #f5f0e8; --color-surface: #f9f6ef;
+    --color-surface-2: #fdfbf7; --color-surface-offset: #ede6d8;
+    --color-divide: #d9d0c0; --color-border: #ccc3b0;
+    --color-text: #2c241a; --color-text-muted: #6b5d4e;
+    --color-text-faint: #a89880;
+    --color-primary: #3d6b4f; --color-primary-hover: #2e5239;
+    --color-primary-highlight: #d4e3da;
+    --color-accent: #8b3a3a; --color-accent-highlight: #e8d5d5;
+    --radius-sm: .25rem; --radius-md: .5rem; --radius-lg: .75rem;
+    --radius-xl: 1rem; --radius-full: 9999px;
+    --shadow-sm: 0 1px 3px oklch(0.2 0.02 60 / 0.08);
+    --shadow-md: 0 4px 12px oklch(0.2 0.02 60 / 0.10);
+    --transition: 180ms cubic-bezier(0.16,1,0.3,1);
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  body {
+    min-height: 100dvh; font-family: var(--font-body); font-size: var(--text-base);
+    line-height: 1.6; color: var(--color-text); background: var(--color-bg);
+    max-width: 480px; margin: 0 auto; padding-top: var(--safe-top);
+  }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { border: none; background: none; cursor: pointer; }
+  h1,h2,h3 { font-family: var(--font-display); line-height: 1.15; }
+  a, button, input, select, textarea {
+    transition: background var(--transition), color var(--transition),
+    border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+  }
+  :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; border-radius: var(--radius-sm); }
 
-#app{width:100%;max-width:480px;min-height:100%;display:flex;flex-direction:column;position:relative}
+  .app-header {
+    position: sticky; top: 0; z-index: 10; background: var(--color-bg);
+    border-bottom: 1px solid var(--color-divide);
+    padding: var(--space-4) var(--space-5);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .app-logo { display: flex; align-items: center; gap: var(--space-2); font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; }
+  .app-logo svg { color: var(--color-primary); }
+  .date-label { font-size: var(--text-xs); color: var(--color-text-muted); font-style: italic; }
 
-/* ── Header ── */
-.app-header{
-  padding:calc(var(--safe-top) + 18px) 20px 14px;
-  background:var(--bg);
-  border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:100;
-}
-.app-header h1{font-family:'Playfair Display',serif;font-size:1.55rem;color:var(--green)}
-.app-header p{font-size:0.8rem;color:var(--muted);margin-top:2px}
+  .page-content { padding: var(--space-5) var(--space-5) calc(92px + var(--safe-bottom)); min-height: calc(100dvh - 60px); }
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-title { font-size: var(--text-xl); margin-bottom: var(--space-1); }
+  .page-subtitle { font-size: var(--text-sm); color: var(--color-text-muted); font-style: italic; margin-bottom: var(--space-5); }
+  .section-label {
+    font-size: var(--text-xs); letter-spacing: .1em; text-transform: uppercase;
+    color: var(--color-text-faint); font-weight: 700; margin: var(--space-5) 0 var(--space-3);
+  }
+  .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+  .hero-card, .form-card, .project-card, .history-card, .goal-card, .stat-card { padding: var(--space-5); }
 
-/* ── Scroll area ── */
-.page{flex:1;overflow-y:auto;padding:18px 16px calc(var(--safe-bot) + 80px);display:none}
-.page.active{display:block}
+  .hero-meta, .meta-row, .goal-meta {
+    display: flex; flex-wrap: wrap; gap: var(--space-3);
+    font-size: var(--text-xs); color: var(--color-text-muted); font-style: italic;
+  }
+  .hero-meta { text-transform: uppercase; letter-spacing: .08em; font-style: normal; justify-content: space-between; }
+  .hero-task { font-family: var(--font-display); font-size: clamp(1.7rem,1.5rem + 1.2vw,2.3rem); margin: var(--space-4) 0 var(--space-2); }
+  .hero-subject { font-size: var(--text-sm); color: var(--color-text-muted); font-style: italic; }
 
-/* ── Bottom nav ── */
-.bottom-nav{
-  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
-  width:100%;max-width:480px;
-  background:var(--card);border-top:1px solid var(--border);
-  display:flex;padding-bottom:var(--safe-bot);
-  z-index:200;
-}
-.nav-btn{
-  flex:1;display:flex;flex-direction:column;align-items:center;
-  padding:10px 4px 8px;border:none;background:transparent;
-  font-family:'Lato',sans-serif;font-size:0.62rem;color:var(--muted);
-  cursor:pointer;transition:color .2s;gap:3px;
-}
-.nav-btn .icon{font-size:1.3rem}
-.nav-btn.active{color:var(--green);font-weight:700}
+  .timer-wrap { margin: var(--space-5) 0; display: grid; place-items: center; }
+  .timer-ring {
+    width: 200px; height: 200px; border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%, var(--color-surface-2) 58%, transparent 59%),
+                conic-gradient(var(--color-primary) calc(var(--progress) * 1%), var(--color-surface-offset) 0);
+    display: grid; place-items: center;
+    box-shadow: inset 0 0 0 1px var(--color-border), var(--shadow-sm);
+  }
+  .timer-inner {
+    width: 150px; height: 150px; border-radius: 50%; background: var(--color-bg);
+    display: grid; place-items: center; text-align: center; padding: var(--space-3);
+  }
+  .timer-time { font-family: var(--font-display); font-size: 2rem; font-variant-numeric: tabular-nums; }
+  .timer-note { font-size: var(--text-xs); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .08em; }
 
-/* ── Cards ── */
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+  .inline-actions { display: flex; justify-content: center; gap: var(--space-3); margin-top: var(--space-2); }
+  .quiet-btn {
+    padding: var(--space-2) var(--space-3); border-radius: var(--radius-full);
+    border: 1px solid var(--color-border); font-size: 11px;
+    text-transform: uppercase; letter-spacing: .07em;
+    color: var(--color-text-muted); background: var(--color-surface-2);
+  }
 
-/* ── Timer ── */
-.timer-project{font-size:0.82rem;color:var(--muted);margin-bottom:4px;text-align:center}
-.timer-project strong{color:var(--green)}
-.timer-display{
-  font-family:'Playfair Display',serif;font-size:3.6rem;
-  text-align:center;color:var(--green);letter-spacing:2px;
-  margin:10px 0;line-height:1;
-}
-.timer-btns{display:flex;gap:10px;justify-content:center;margin-bottom:18px}
-.btn{
-  padding:12px 28px;border-radius:50px;border:none;cursor:pointer;
-  font-family:'Lato',sans-serif;font-size:0.9rem;font-weight:700;
-  min-height:48px;transition:opacity .15s,transform .1s;
-}
-.btn:active{transform:scale(0.97);opacity:.85}
-.btn-primary{background:var(--green);color:#fff}
-.btn-secondary{background:var(--green-light);color:var(--green)}
-.btn-danger{background:#fdecea;color:#c0392b}
-.btn-sm{padding:9px 18px;font-size:0.82rem;min-height:40px}
+  .slide-shell {
+    background: var(--color-surface-offset); border: 1px solid var(--color-border);
+    border-radius: var(--radius-full); padding: 6px;
+    position: relative; overflow: hidden; margin-top: var(--space-5);
+  }
+  .slide-track { height: 56px; position: relative; user-select: none; }
+  .slide-label {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    font-size: var(--text-sm); font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--color-text-muted);
+  }
+  .slide-thumb {
+    position: absolute; left: 0; top: 0; width: 56px; height: 56px;
+    border-radius: 50%; background: var(--color-primary);
+    display: grid; place-items: center; color: white;
+    box-shadow: var(--shadow-md); touch-action: none;
+  }
+  .slide-thumb svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
 
-/* ── Slide to finish ── */
-.slide-wrap{position:relative;height:52px;background:#e8e0d0;border-radius:50px;overflow:hidden;margin-top:4px;user-select:none}
-.slide-track{position:absolute;left:0;top:0;height:100%;background:var(--green);border-radius:50px;transition:width .05s;display:flex;align-items:center;justify-content:flex-end;padding-right:12px}
-.slide-track span{color:#fff;font-size:0.75rem;font-weight:700;white-space:nowrap}
-.slide-label{position:absolute;width:100%;text-align:center;top:50%;transform:translateY(-50%);font-size:0.8rem;color:var(--muted);pointer-events:none}
-.slide-handle{position:absolute;top:4px;width:44px;height:44px;background:#fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.2);cursor:grab;display:flex;align-items:center;justify-content:center;font-size:1.1rem;touch-action:none}
+  .mini-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: var(--space-3); margin-bottom: var(--space-5); }
+  .stat-label { font-size: var(--text-xs); letter-spacing: .08em; text-transform: uppercase; color: var(--color-text-faint); font-weight: 700; }
+  .stat-value { font-family: var(--font-display); font-size: var(--text-lg); margin-top: 2px; }
 
-/* ── No-project prompt ── */
-.no-project-hint{text-align:center;padding:22px 10px;color:var(--muted);font-size:0.85rem;line-height:1.6}
+  .project-list, .history-list, .goal-list { display: flex; flex-direction: column; gap: var(--space-3); }
+  .project-top, .history-top, .goal-top { display: flex; justify-content: space-between; gap: var(--space-3); align-items: flex-start; }
+  .project-name, .history-name, .goal-name { font-size: var(--text-base); }
+  .badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; padding: 2px 8px; border-radius: var(--radius-full); }
+  .badge.primary { background: var(--color-primary-highlight); color: var(--color-primary); }
+  .badge.accent  { background: var(--color-accent-highlight);   color: var(--color-accent); }
+  .project-card.active-project { border-color: var(--color-primary); border-width: 2px; }
+  .project-actions, .history-actions, .goal-actions { display: flex; gap: var(--space-2); margin-top: var(--space-4); }
+  .ghost-btn {
+    padding: var(--space-2) var(--space-3); border-radius: var(--radius-md);
+    border: 1px solid var(--color-border); font-size: 11px;
+    text-transform: uppercase; letter-spacing: .06em; color: var(--color-text-muted);
+  }
 
-/* ── Projects ── */
-.project-card{cursor:pointer;border:2px solid transparent;transition:border-color .2s}
-.project-card.active-project{border-color:var(--green);background:var(--green-light)}
-.project-card h3{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--text)}
-.project-card .subject{font-size:0.78rem;color:var(--muted);margin:2px 0 10px}
-.progress-bar-bg{height:6px;background:#e0d8c8;border-radius:3px;margin-bottom:6px}
-.progress-bar-fill{height:6px;background:var(--green);border-radius:3px;transition:width .4s}
-.project-meta{font-size:0.75rem;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px}
-.badge{display:inline-block;padding:2px 8px;border-radius:50px;font-size:0.7rem;font-weight:700}
-.badge-green{background:var(--green-light);color:var(--green)}
-.badge-active{background:var(--green);color:#fff}
+  .form-group { margin-bottom: var(--space-4); }
+  .form-label { display: block; font-size: var(--text-sm); font-weight: 700; margin-bottom: var(--space-2); }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; padding: var(--space-3) var(--space-4);
+    border: 1.5px solid var(--color-border); border-radius: var(--radius-md);
+    background: var(--color-bg);
+  }
+  .form-textarea { min-height: 86px; resize: vertical; }
+  .btn-primary {
+    width: 100%; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md);
+    font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    background: var(--color-primary); color: white;
+  }
+  .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
 
-/* ── Section header ── */
-.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.section-header h2{font-family:'Playfair Display',serif;font-size:1.1rem}
+  .rating-row { display: grid; grid-template-columns: repeat(5,1fr); gap: var(--space-2); margin: var(--space-4) 0; }
+  .rating-btn {
+    padding: var(--space-4) 0; border: 2px solid var(--color-border);
+    border-radius: var(--radius-md); background: var(--color-surface-2);
+    font-family: var(--font-display); font-size: 1.4rem; font-weight: 700;
+    color: var(--color-text-muted); min-height: 64px;
+  }
+  .rating-btn.active { background: var(--color-primary-highlight); border-color: var(--color-primary); color: var(--color-primary); }
 
-/* ── History ── */
-.session-card{cursor:pointer}
-.session-card h4{font-size:0.92rem;font-weight:700;margin-bottom:2px}
-.session-card .session-meta{font-size:0.75rem;color:var(--muted)}
-.stars{color:#c9a84c;font-size:0.95rem;letter-spacing:1px}
+  .empty-state {
+    padding: var(--space-10) var(--space-5); text-align: center;
+    color: var(--color-text-muted); background: var(--color-surface);
+    border: 1px dashed var(--color-border); border-radius: var(--radius-lg);
+  }
+  .empty-state h3 { font-size: var(--text-lg); margin-bottom: var(--space-2); color: var(--color-text); }
 
-/* ── Stats ── */
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.stat-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;box-shadow:var(--shadow)}
-.stat-box .val{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--green);font-weight:700}
-.stat-box .lbl{font-size:0.68rem;color:var(--muted);margin-top:3px}
-.stat-table{width:100%;border-collapse:collapse;font-size:0.8rem;margin-top:6px}
-.stat-table th{text-align:left;color:var(--muted);font-weight:400;padding:5px 0;border-bottom:1px solid var(--border)}
-.stat-table td{padding:6px 0;border-bottom:1px solid var(--border)}
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 480px;
+    background: var(--color-surface); border-top: 1px solid var(--color-divide);
+    display: flex; z-index: 12; padding-bottom: var(--safe-bottom);
+    box-shadow: 0 -2px 12px oklch(0.2 0.02 60 / 0.06);
+  }
+  .nav-btn {
+    flex: 1; padding: var(--space-3) var(--space-2);
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    color: var(--color-text-faint); font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .05em;
+    border-top: 2px solid transparent;
+  }
+  .nav-btn.active { color: var(--color-primary); border-top-color: var(--color-primary); }
+  .nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; }
 
-/* ── Modals ── */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
-.modal-overlay.open{opacity:1;pointer-events:all}
-.modal-sheet{
-  width:100%;max-width:480px;background:var(--card);
-  border-radius:1.2rem 1.2rem 0 0;
-  padding:24px 20px calc(var(--safe-bot) + 24px);
-  transform:translateY(60px);transition:transform .28s cubic-bezier(.4,0,.2,1);
-}
-.modal-overlay.open .modal-sheet{transform:translateY(0)}
-.modal-sheet h2{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;text-align:center}
-.rating-row{display:flex;gap:10px;justify-content:center;margin:14px 0}
-.rating-btn{
-  width:54px;height:54px;border-radius:50%;border:2px solid var(--border);
-  background:#fff;font-size:1.3rem;font-weight:700;cursor:pointer;
-  font-family:'Lato',sans-serif;color:var(--green);transition:all .15s;
-}
-.rating-btn.selected{background:var(--green);color:#fff;border-color:var(--green);transform:scale(1.12)}
-.modal-input{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:0.65rem;font-family:'Lato',sans-serif;font-size:0.92rem;background:var(--bg);margin-bottom:12px;resize:vertical}
-.modal-input:focus{outline:none;border-color:var(--green)}
-.form-label{font-size:0.78rem;color:var(--muted);margin-bottom:5px;display:block}
-.form-row{margin-bottom:12px}
-.modal-actions{display:flex;gap:10px;margin-top:4px}
-.modal-actions .btn{flex:1}
+  .toast {
+    position: fixed; left: 50%; bottom: calc(86px + var(--safe-bottom));
+    transform: translateX(-50%);
+    background: var(--color-text); color: var(--color-bg);
+    padding: var(--space-3) var(--space-5); border-radius: var(--radius-full);
+    font-size: var(--text-sm); box-shadow: var(--shadow-md);
+    z-index: 25; opacity: 0; pointer-events: none; transition: opacity 200ms;
+  }
+  .toast.show { opacity: 1; }
 
-/* ── Install banner ── */
-.install-banner{background:var(--green-light);border:1px solid var(--green);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;font-size:0.78rem;color:var(--green);line-height:1.5;display:none}
+  canvas { margin-top: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); }
 
-/* ── Misc ── */
-.empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:0.88rem}
-.full-btn{width:100%;margin-bottom:10px}
+  .install-note {
+    margin-top: var(--space-5); padding: var(--space-4);
+    font-size: var(--text-xs); color: var(--color-text-muted);
+    background: var(--color-surface-offset); border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.45);
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 220ms;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal-sheet {
+    width: 100%; max-width: 480px; background: var(--color-bg);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding: var(--space-6) var(--space-5) calc(var(--space-8) + var(--safe-bottom));
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.18);
+    transform: translateY(40px); transition: transform 240ms cubic-bezier(0.16,1,0.3,1);
+  }
+  .modal-overlay.open .modal-sheet { transform: translateY(0); }
+  .modal-handle { width: 40px; height: 4px; border-radius: 2px; background: var(--color-border); margin: 0 auto var(--space-4); }
+  .modal-title { font-family: var(--font-display); font-size: var(--text-lg); margin-bottom: var(--space-2); }
+  .modal-subtitle { font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-4); }
+  .rating-desc { text-align: center; font-size: var(--text-sm); color: var(--color-text-muted); font-style: italic; min-height: 1.4em; margin-bottom: var(--space-4); }
+
+  .stats-grid-4 { display: grid; grid-template-columns: repeat(2,1fr); gap: var(--space-3); margin-bottom: var(--space-4); }
+  .subject-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+  .subject-table th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--color-text-faint); padding: var(--space-2) var(--space-3); background: var(--color-surface-offset); }
+  .subject-table td { padding: var(--space-2) var(--space-3); border-top: 1px solid var(--color-divide); }
 </style>
 </head>
 <body>
-<div id="app">
 
-  <!-- Header -->
-  <div class="app-header">
-    <h1 id="page-title">Today</h1>
-    <p id="page-sub">Track focused homework sessions</p>
+<header class="app-header">
+  <div class="app-logo">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h6M9 11h4"/>
+    </svg>
+    Study Log
   </div>
+  <span class="date-label" id="header-date"></span>
+</header>
 
-  <!-- TODAY PAGE -->
-  <div class="page active" id="page-today">
-    <div id="install-banner" class="install-banner">
-      📲 <strong>Add to Home Screen:</strong> tap the Share button in Safari → "Add to Home Screen" → Add. The app will then open fullscreen like Venato.
-    </div>
-
-    <div class="card" id="timer-card">
-      <div class="timer-project" id="timer-project-label">No Active Project</div>
-      <div class="timer-display" id="timer-display">00:00:00</div>
-      <div class="timer-btns">
-        <button class="btn btn-primary" id="btn-startstop">Start</button>
-        <button class="btn btn-secondary" id="btn-reset">Reset</button>
-      </div>
-      <div class="slide-wrap" id="slide-wrap">
-        <div class="slide-track" id="slide-track" style="width:0%"><span id="slide-pct"></span></div>
-        <div class="slide-label" id="slide-label">Slide to finish &amp; rate →</div>
-        <div class="slide-handle" id="slide-handle" style="left:4px">▶</div>
-      </div>
-    </div>
-
-    <div id="no-project-hint" class="no-project-hint" style="display:none">
-      📚 Choose a project in the <strong>Projects</strong> tab to begin timing.
-    </div>
-  </div>
-
-  <!-- PROJECTS PAGE -->
-  <div class="page" id="page-projects">
-    <div class="section-header">
-      <h2>Projects</h2>
-      <button class="btn btn-primary btn-sm" id="btn-new-project">+ New</button>
-    </div>
-    <div id="projects-list"></div>
-  </div>
-
-  <!-- HISTORY PAGE -->
-  <div class="page" id="page-history">
-    <div class="section-header">
-      <h2>History</h2>
-    </div>
-    <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px">All study sessions</p>
-    <div id="history-list"></div>
-  </div>
-
-  <!-- STATS PAGE -->
-  <div class="page" id="page-stats">
-    <div class="section-header"><h2>Stats</h2></div>
-    <p style="font-size:0.8rem;color:var(--muted);margin-bottom:14px">Productivity insights</p>
-    <div class="stat-grid" id="stat-grid"></div>
-    <div class="card" id="subject-breakdown"></div>
-    <div class="card" id="project-breakdown"></div>
-    <button class="btn btn-primary full-btn" id="btn-export">Export JSON for Venato</button>
-  </div>
-
-  <!-- BOTTOM NAV -->
-  <nav class="bottom-nav">
-    <button class="nav-btn active" data-page="today"><span class="icon">⏱</span>Today</button>
-    <button class="nav-btn" data-page="projects"><span class="icon">📁</span>Projects</button>
-    <button class="nav-btn" data-page="history"><span class="icon">📋</span>History</button>
-    <button class="nav-btn" data-page="stats"><span class="icon">📊</span>Stats</button>
-  </nav>
-</div>
-
-<!-- RATING MODAL -->
-<div class="modal-overlay" id="rating-modal">
-  <div class="modal-sheet">
-    <h2>How productive was this session?</h2>
-    <div style="text-align:center;font-size:0.8rem;color:var(--muted);margin-top:-8px;margin-bottom:4px">1 = not at all · 5 = fully focused</div>
-    <div class="rating-row" id="rating-btns"></div>
-    <div class="form-row">
-      abel class="form-label">Session notes (optional)</label>
-      <textarea class="modal-input" id="rating-notes" rows="3" placeholder="What did you work on?"></textarea>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" id="rating-save" disabled>Save Session</button>
-    </div>
-  </div>
-</div>
-
-<!-- PROJECT FORM MODAL -->
-<div class="modal-overlay" id="project-modal">
-  <div class="modal-sheet">
-    <h2 id="project-modal-title">New Project</h2>
-    <div class="form-row">abel class="form-label">Project name *</label><input class="modal-input" id="pf-name" placeholder="e.g. Physics Lab Report"/></div>
-    <div class="form-row">abel class="form-label">Subject *</label><input class="modal-input" id="pf-subject" placeholder="e.g. Physics 201"/></div>
-    <div class="form-row">abel class="form-label">Estimated hours</label><input class="modal-input" id="pf-hours" type="number" min="0" step="0.5" placeholder="0"/></div>
-    <div class="form-row">abel class="form-label">Due date (optional)</label><input class="modal-input" id="pf-due" type="date"/></div>
-    <div class="form-row">abel class="form-label">Notes (optional)</label><textarea class="modal-input" id="pf-notes" rows="2" placeholder="Any details…"></textarea></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" id="pf-cancel">Cancel</button>
-      <button class="btn btn-primary" id="pf-save">Save Project</button>
-    </div>
-  </div>
-</div>
-
-<!-- SESSION EDIT MODAL -->
-<div class="modal-overlay" id="edit-modal">
-  <div class="modal-sheet">
-    <h2>Edit Session</h2>
-    <div class="form-row">abel class="form-label">Duration (minutes)</label><input class="modal-input" id="ef-duration" type="number" min="1"/></div>
-    <div class="form-row">abel class="form-label">Productivity rating</label>
-      <div class="rating-row" id="edit-rating-btns"></div>
-    </div>
-    <div class="form-row">abel class="form-label">Notes</label><textarea class="modal-input" id="ef-notes" rows="3"></textarea></div>
-    <div class="modal-actions">
-      <button class="btn btn-danger btn-sm" id="ef-delete">Delete</button>
-      <button class="btn btn-secondary" id="ef-cancel">Cancel</button>
-      <button class="btn btn-primary" id="ef-save">Save</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// ─────────────────────────────────────────────
-//  STATE
-// ─────────────────────────────────────────────
-var state = {
-  sessions: [],
-  projects: [],
-  activeProjectId: null,
-  // Timer (in-memory, also mirrored to localStorage)
-  timerRunning: false,
-  timerStartedAt: null,   // Date.now() when last started
-  elapsedBeforePause: 0,  // ms accumulated before last pause
-};
-
-// ─────────────────────────────────────────────
-//  PERSIST HELPERS
-// ─────────────────────────────────────────────
-function saveData() {
-  localStorage.setItem('venato_sessions',  JSON.stringify(state.sessions));
-  localStorage.setItem('venato_projects',  JSON.stringify(state.projects));
-  localStorage.setItem('venato_active_project_id', state.activeProjectId || '');
-}
-
-// ✅ FIX: Save timer state separately so iOS reload can restore it
-function saveTimer() {
-  localStorage.setItem('venato_timer', JSON.stringify({
-    timerRunning:      state.timerRunning,
-    timerStartedAt:    state.timerStartedAt,
-    elapsedBeforePause: state.elapsedBeforePause
-  }));
-}
+<main>
+  <!-- TODAY -->
+  <section class="page active" id="page-today">
+    <div class="page-content">
+      <h1 class="page-title">Today</h1>
+      <p class="page-subtitle">Track focused homework sessions.</p>
+      <div class="card hero-card">
+        <div class="hero-meta">
+          <span id="heroProjectStatus">No active project</span>
+          <span id="heroEstimate">No estimate yet</span>
+        </div>
+        <div class="hero-task" id="heroTask">Start a study session</div>
+        <div class="hero-subject" id="heroSubject">
