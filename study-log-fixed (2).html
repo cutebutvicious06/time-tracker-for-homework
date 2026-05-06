@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f5f0e8" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Study Log" />
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Study Log</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'Lato', 'Helvetica Neue', sans-serif;
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.1rem);
+      --space-1:.25rem; --space-2:.5rem; --space-3:.75rem; --space-4:1rem; --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem; --space-10:2.5rem; --space-12:3rem;
+      --color-bg:#f5f0e8; --color-surface:#f9f6ef; --color-surface-2:#fdfbf7; --color-surface-offset:#ede6d8; --color-divider:#d9d0c0; --color-border:#ccc3b0;
+      --color-text:#2c241a; --color-text-muted:#6b5d4e; --color-text-faint:#a89880; --color-primary:#3d6b4f; --color-primary-hover:#2e5239; --color-primary-highlight:#d4e3da; --color-accent:#8b3a3a; --color-accent-highlight:#e8d5d5;
+      --radius-sm:.25rem; --radius-md:.5rem; --radius-lg:.75rem; --radius-xl:1rem; --radius-full:9999px;
+      --shadow-sm:0 1px 3px oklch(0.2 0.02 60 / 0.08); --shadow-md:0 4px 12px oklch(0.2 0.02 60 / 0.10); --transition:180ms cubic-bezier(0.16,1,0.3,1); --safe-top:env(safe-area-inset-top,0px); --safe-bottom:env(safe-area-inset-bottom,0px);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0} html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility} body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);line-height:1.6;color:var(--color-text);background:var(--color-bg);max-width:480px;margin:0 auto;padding-top:var(--safe-top)} button,input,select,textarea{font:inherit;color:inherit} button{border:none;background:none;cursor:pointer} h1,h2,h3{font-family:var(--font-display);line-height:1.15} a,button,input,select,textarea{transition:background var(--transition),color var(--transition),border-color var(--transition),box-shadow var(--transition),transform var(--transition)} :focus-visible{outline:2px solid var(--color-primary);outline-offset:3px;border-radius:var(--radius-sm)}
+    .app-header{position:sticky;top:0;z-index:10;background:var(--color-bg);border-bottom:1px solid var(--color-divider);padding:var(--space-4) var(--space-5);display:flex;align-items:center;justify-content:space-between}
+    .app-logo{display:flex;align-items:center;gap:var(--space-2);font-family:var(--font-display);font-size:var(--text-lg);font-weight:700}.app-logo svg{color:var(--color-primary)} .date-label{font-size:var(--text-xs);color:var(--color-text-muted);font-style:italic}
+    .page-content{padding:var(--space-5) var(--space-5) calc(92px + var(--safe-bottom));min-height:calc(100dvh - 60px)} .page{display:none}.page.active{display:block}.page-title{font-size:var(--text-xl);margin-bottom:var(--space-1)} .page-subtitle{font-size:var(--text-sm);color:var(--color-text-muted);font-style:italic;margin-bottom:var(--space-5)} .section-label{font-size:var(--text-xs);letter-spacing:.1em;text-transform:uppercase;color:var(--color-text-faint);font-weight:700;margin:var(--space-5) 0 var(--space-3)}
+    .card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm)} .hero-card,.form-card,.project-card,.history-card,.goal-card,.stat-card{padding:var(--space-5)}
+    .hero-meta,.meta-row,.goal-meta{display:flex;flex-wrap:wrap;gap:var(--space-3);font-size:var(--text-xs);color:var(--color-text-muted);font-style:italic}.hero-meta{text-transform:uppercase;letter-spacing:.08em;font-style:normal;justify-content:space-between}
+    .hero-task{font-family:var(--font-display);font-size:clamp(1.7rem,1.5rem + 1.2vw,2.3rem);margin:var(--space-4) 0 var(--space-2)} .hero-subject{font-size:var(--text-sm);color:var(--color-text-muted);font-style:italic}
+    .timer-wrap{margin:var(--space-5) 0;display:grid;place-items:center} .timer-ring{width:200px;height:200px;border-radius:50%;background:radial-gradient(circle at 50% 50%,var(--color-surface-2) 58%,transparent 59%),conic-gradient(var(--color-primary) calc(var(--progress,0)*1%),var(--color-surface-offset) 0);display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--color-border),var(--shadow-sm)} .timer-inner{width:150px;height:150px;border-radius:50%;background:var(--color-bg);display:grid;place-items:center;text-align:center;padding:var(--space-3)} .timer-time{font-family:var(--font-display);font-size:2rem;font-variant-numeric:tabular-nums} .timer-note{font-size:var(--text-xs);color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.08em}
+    .inline-actions{display:flex;justify-content:center;gap:var(--space-3);margin-top:var(--space-2)} .quiet-btn{padding:var(--space-2) var(--space-3);border-radius:var(--radius-full);border:1px solid var(--color-border);font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--color-text-muted);background:var(--color-surface-2)}
+    .slide-shell{background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:var(--radius-full);padding:6px;position:relative;overflow:hidden;margin-top:var(--space-5)} .slide-track{height:56px;position:relative;user-select:none} .slide-label{position:absolute;inset:0;display:grid;place-items:center;font-size:var(--text-sm);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-muted)} .slide-thumb{position:absolute;left:0;top:0;width:56px;height:56px;border-radius:50%;background:var(--color-primary);display:grid;place-items:center;color:white;box-shadow:var(--shadow-md);touch-action:none}.slide-thumb svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2}
+    .mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-3);margin-bottom:var(--space-5)} .stat-label{font-size:var(--text-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-faint);font-weight:700}.stat-value{font-family:var(--font-display);font-size:var(--text-lg);margin-top:2px}
+    .project-list,.history-list,.goal-list{display:flex;flex-direction:column;gap:var(--space-3)} .project-top,.history-top,.goal-top{display:flex;justify-content:space-between;gap:var(--space-3);align-items:flex-start} .project-name,.history-name,.goal-name{font-size:var(--text-base)} .badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:var(--radius-full)} .badge.primary{background:var(--color-primary-highlight);color:var(--color-primary)} .badge.accent{background:var(--color-accent-highlight);color:var(--color-accent)} .project-card.active-project{border-color:var(--color-primary);border-width:2px} .project-actions,.history-actions,.goal-actions{display:flex;gap:var(--space-2);margin-top:var(--space-4)} .ghost-btn{padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);border:1px solid var(--color-border);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-muted)}
+    .form-group{margin-bottom:var(--space-4)} .form-label{display:block;font-size:var(--text-sm);font-weight:700;margin-bottom:var(--space-2)} .form-input,.form-select,.form-textarea{width:100%;padding:var(--space-3) var(--space-4);border:1.5px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-bg)} .form-textarea{min-height:86px;resize:vertical}
+    .btn-primary{width:100%;padding:var(--space-3) var(--space-4);border-radius:var(--radius-md);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--color-primary);color:white} .btn-primary:disabled{opacity:.4;cursor:not-allowed}
+    .rating-row{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--space-2);margin:var(--space-4) 0} .rating-btn{padding:var(--space-4) 0;border:2px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface-2);font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--color-text-muted);min-height:64px} .rating-btn.active{background:var(--color-primary-highlight);border-color:var(--color-primary);color:var(--color-primary)}
+    .empty-state{padding:var(--space-10) var(--space-5);text-align:center;color:var(--color-text-muted);background:var(--color-surface);border:1px dashed var(--color-border);border-radius:var(--radius-lg)} .empty-state h3{font-size:var(--text-lg);margin-bottom:var(--space-2);color:var(--color-text)}
+    .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--color-surface);border-top:1px solid var(--color-divider);display:flex;z-index:12;padding-bottom:var(--safe-bottom);box-shadow:0 -2px 12px oklch(0.2 0.02 60 / 0.06)} .nav-btn{flex:1;padding:var(--space-3) var(--space-2);display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--color-text-faint);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border-top:2px solid transparent}.nav-btn.active{color:var(--color-primary);border-top-color:var(--color-primary)} .nav-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+    .toast{position:fixed;left:50%;bottom:calc(86px + var(--safe-bottom));transform:translateX(-50%);background:var(--color-text);color:var(--color-bg);padding:var(--space-3) var(--space-5);border-radius:var(--radius-full);font-size:var(--text-sm);box-shadow:var(--shadow-md);z-index:25;opacity:0;pointer-events:none;transition:opacity 200ms}.toast.show{opacity:1} canvas{margin-top:var(--space-4);background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-4)} .install-note{margin-top:var(--space-5);padding:var(--space-4);font-size:var(--text-xs);color:var(--color-text-muted);background:var(--color-surface-offset);border-radius:var(--radius-lg);border:1px solid var(--color-border)}
+    /* Modal overlay */
+    .modal-overlay{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,0.45);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 220ms}
+    .modal-overlay.open{opacity:1;pointer-events:auto}
+    .modal-sheet{width:100%;max-width:480px;background:var(--color-bg);border-radius:var(--radius-xl) var(--radius-xl) 0 0;padding:var(--space-6) var(--space-5) calc(var(--space-8) + var(--safe-bottom));box-shadow:0 -8px 32px rgba(0,0,0,0.18);transform:translateY(40px);transition:transform 240ms cubic-bezier(0.16,1,0.3,1)}
+    .modal-overlay.open .modal-sheet{transform:translateY(0)}
+    .modal-handle{width:40px;height:4px;border-radius:2px;background:var(--color-border);margin:0 auto var(--space-4)}
+    .modal-title{font-family:var(--font-display);font-size:var(--text-lg);margin-bottom:var(--space-2)}
+    .modal-subtitle{font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-4)}
+    .rating-desc{text-align:center;font-size:var(--text-sm);color:var(--color-text-muted);font-style:italic;min-height:1.4em;margin-bottom:var(--space-4)}
+    .stats-grid-4{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-3);margin-bottom:var(--space-4)}
+    .subject-table{width:100%;border-collapse:collapse;font-size:var(--text-sm)} .subject-table th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-faint);padding:var(--space-2) var(--space-3);background:var(--color-surface-offset)} .subject-table td{padding:var(--space-2) var(--space-3);border-top:1px solid var(--color-divider)}
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h6M9 11h4"/></svg>Study Log</div>
+    <span class="date-label" id="header-date"></span>
+  </header>
+  <main>
+    <section class="page active" id="page-today"><div class="page-content">
+      <h1 class="page-title">Today</h1>
+      <p class="page-subtitle">Track focused homework sessions.</p>
+      <div class="card hero-card">
+        <div class="hero-meta"><span id="heroProjectStatus">No active project</span><span id="heroEstimate">No estimate yet</span></div>
+        <div class="hero-task" id="heroTask">Start a study session</div>
+        <div class="hero-subject" id="heroSubject">Choose a project below or create one in Projects.</div>
+        <div class="timer-wrap"><div class="timer-ring" id="timerRing" style="--progress:0"><div class="timer-inner"><div class="timer-time" id="timerDisplay">00:00:00</div><div class="timer-note" id="timerState">Ready to focus</div></div></div></div>
+        <div class="inline-actions">
+          <button class="quiet-btn" id="startPauseBtn">Start session</button>
+          <button class="quiet-btn" id="resetBtn">Reset</button>
+          <button class="quiet-btn" id="manualAddBtn">Manual log</button>
+        </div>
+        <div class="slide-shell"><div class="slide-track" id="slideTrack"><div class="slide-label" id="slideLabel">Slide to finish and rate</div><div class="slide-thumb" id="slideThumb" role="button" tabindex="0" aria-label="Slide to finish session"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></div></div></div>
+      </div>
+      <div class="mini-grid">
+        <div class="card stat-card"><div class="stat-label">Today</div><div class="stat-value" id="todayMinutes">0 min</div></div>
+        <div class="card stat-card"><div class="stat-label">Productive</div><div class="stat-value" id="todayProductive">0 min</div></div>
+      </div>
+      <div class="section-label">Quick projects</div><div class="project-list" id="todayProjectList"></div>
+      <div class="install-note">Add to Home Screen from Safari for the full app experience — tap the Share icon, then "Add to Home Screen".</div>
+    </div></section>
+
+    <section class="page" id="page-history"><div class="page-content">
+      <h1 class="page-title">History</h1>
+      <p class="page-subtitle">All study sessions, newest first.</p>
+      <div class="history-list" id="historyList"></div>
+    </div></section>
+
+    <section class="page" id="page-stats"><div class="page-content">
+      <h1 class="page-title">Stats</h1>
+      <p class="page-subtitle">Productivity insights.</p>
+      <div class="stats-grid-4">
+        <div class="card stat-card"><div class="stat-label">Total Time</div><div class="stat-value" id="statTotal">0 min</div></div>
+        <div class="card stat-card"><div class="stat-label">Productive</div><div class="stat-value" id="statProductive">0 min</div></div>
+        <div class="card stat-card"><div class="stat-label">Not Productive</div><div class="stat-value" id="statNonproductive">0 min</div></div>
+        <div class="card stat-card"><div class="stat-label">Productive %</div><div class="stat-value" id="statPct">0%</div></div>
+        <div class="card stat-card"><div class="stat-label">Avg Rating</div><div class="stat-value" id="avgRating">0.0</div></div>
+        <div class="card stat-card"><div class="stat-label">Sessions</div><div class="stat-value" id="statsSessions">0</div></div>
+        <div class="card stat-card"><div class="stat-label">This Week</div><div class="stat-value" id="statWeek">0 min</div></div>
+        <div class="card stat-card"><div class="stat-label">Venato Pts</div><div class="stat-value" id="statPoints">0</div></div>
+      </div>
+      <canvas id="statsChart" height="240"></canvas>
+      <div class="section-label">By subject</div>
+      <div class="card" style="overflow:hidden;margin-bottom:var(--space-3)"><table class="subject-table" id="subjectTable"><thead><tr><th>Subject</th><th>Total</th><th>Productive</th></tr></thead><tbody id="subjectTableBody"></tbody></table></div>
+      <div class="section-label">By project</div>
+      <div class="project-list" id="projectStatsList"></div>
+      <button class="btn-primary" id="exportJsonBtn" style="margin-top:var(--space-5)">Export JSON for Venato</button>
+    </div></section>
+
+    <section class="page" id="page-projects"><div class="page-content">
+      <h1 class="page-title">Projects</h1>
+      <p class="page-subtitle">Goals are completion-based, not weekly quotas.</p>
+      <div class="card form-card">
+        <div class="form-group"><label class="form-label" for="projectName">Project name</label><input class="form-input" id="projectName" placeholder="History essay" /></div>
+        <div class="form-group"><label class="form-label" for="projectSubject">Subject</label><input class="form-input" id="projectSubject" placeholder="History" /></div>
+        <div class="form-group"><label class="form-label" for="projectEstimate">Estimated total minutes</label><input class="form-input" id="projectEstimate" type="number" min="1" value="180" /></div>
+        <button class="btn-primary" id="addProjectBtn">+ New Project</button>
+      </div>
+      <div class="section-label">Your projects</div>
+      <div class="goal-list" id="projectList"></div>
+    </div></section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Primary">
+    <button class="nav-btn active" data-target="today"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13V10.5"/></svg><span>Today</span></button>
+    <button class="nav-btn" data-target="history"><svg viewBox="0 0 24 24"><path d="M12 8v5l3 2"/><circle cx="12" cy="12" r="9"/></svg><span>History</span></button>
+    <button class="nav-btn" data-target="stats"><svg viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M7 16V9"/><path d="M12 16V5"/><path d="M17 16v-7"/></svg><span>Stats</span></button>
+    <button class="nav-btn" data-target="projects"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h6M9 11h4"/></svg><span>Projects</span></button>
+  </nav>
+
+  <!-- Rating Modal (replaces prompt() — critical for iOS PWA) -->
+  <div class="modal-overlay" id="ratingModal" role="dialog" aria-modal="true" aria-labelledby="ratingModalTitle">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="ratingModalTitle">How productive was this session?</div>
+      <div class="modal-subtitle" id="ratingSessionInfo">Session duration</div>
+      <div class="rating-row" id="ratingRow">
+        <button class="rating-btn" data-r="1">1</button>
+        <button class="rating-btn" data-r="2">2</button>
+        <button class="rating-btn" data-r="3">3</button>
+        <button class="rating-btn" data-r="4">4</button>
+        <button class="rating-btn" data-r="5">5</button>
+      </div>
+      <div class="rating-desc" id="ratingDesc">Tap a number to rate</div>
+      <div class="form-group">
+        <label class="form-label" for="sessionNotes">Notes (optional)</label>
+        <textarea class="form-input form-textarea" id="sessionNotes" rows="2" placeholder="What did you work on?"></textarea>
+      </div>
+      <button class="btn-primary" id="saveSessionBtn" disabled>Save Session</button>
+    </div>
+  </div>
+
+  <!-- Manual Log Modal -->
+  <div class="modal-overlay" id="manualModal" role="dialog" aria-modal="true" aria-labelledby="manualModalTitle">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="manualModalTitle">Add Manual Log</div>
+      <div class="form-group">
+        <label class="form-label" for="manualMinutes">Minutes studied</label>
+        <input class="form-input" id="manualMinutes" type="number" min="1" value="45" />
+      </div>
+      <div class="form-group"><label class="form-label">Productivity rating</label>
+        <div class="rating-row" id="manualRatingRow">
+          <button class="rating-btn" data-mr="1">1</button>
+          <button class="rating-btn" data-mr="2">2</button>
+          <button class="rating-btn" data-mr="3">3</button>
+          <button class="rating-btn" data-mr="4">4</button>
+          <button class="rating-btn" data-mr="5">5</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="manualNotes">Notes (optional)</label>
+        <textarea class="form-input form-textarea" id="manualNotes" rows="2" placeholder="What did you work on?"></textarea>
+      </div>
+      <button class="btn-primary" id="saveManualBtn" disabled>Save Log</button>
+      <button class="ghost-btn" id="cancelManualBtn" style="width:100%;text-align:center;margin-top:var(--space-3)">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Edit Session Modal -->
+  <div class="modal-overlay" id="editModal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="editModalTitle">Edit Session</div>
+      <input type="hidden" id="editSessionId" />
+      <div class="form-group">
+        <label class="form-label" for="editMinutes">Duration (minutes)</label>
+        <input class="form-input" id="editMinutes" type="number" min="1" />
+      </div>
+      <div class="form-group"><label class="form-label">Productivity rating</label>
+        <div class="rating-row" id="editRatingRow">
+          <button class="rating-btn" data-er="1">1</button>
+          <button class="rating-btn" data-er="2">2</button>
+          <button class="rating-btn" data-er="3">3</button>
+          <button class="rating-btn" data-er="4">4</button>
+          <button class="rating-btn" data-er="5">5</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="editNotes">Notes</label>
+        <textarea class="form-input form-textarea" id="editNotes" rows="2"></textarea>
+      </div>
+      <button class="btn-primary" id="saveEditBtn">Save Changes</button>
+      <button class="ghost-btn" id="deleteSessionBtn" style="width:100%;text-align:center;margin-top:var(--space-3);color:var(--color-accent)">Delete Session</button>
+      <button class="ghost-btn" id="cancelEditBtn" style="width:100%;text-align:center;margin-top:var(--space-3)">Cancel</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ─── localStorage keys ────────────────────────────────────────────
+    const LS = { sessions:'venato_sessions', projects:'venato_projects', activeId:'venato_active_project_id' };
+
+    // ─── Default seed data ────────────────────────────────────────────
+    const seedProjects = [
+      {id:'p1', name:'Bible quiz review', subject:'Bible', estimate:180},
+      {id:'p2', name:'Machining homework', subject:'CNC', estimate:150},
+      {id:'p3', name:'History reading', subject:'History', estimate:90}
+    ];
+    const seedLogs = [
+      {id:'l1', projectId:'p1', project:'Bible quiz review', subject:'Bible', start:'2026-04-28T18:00:00', end:'2026-04-28T18:42:00', durationMin:42, rating:5, notes:'Romans memory review'},
+      {id:'l2', projectId:'p2', project:'Machining homework', subject:'CNC', start:'2026-04-29T15:10:00', end:'2026-04-29T16:05:00', durationMin:55, rating:3, notes:'Tolerance worksheet'},
+      {id:'l3', projectId:'p1', project:'Bible quiz review', subject:'Bible', start:'2026-04-30T07:15:00', end:'2026-04-30T08:00:00', durationMin:45, rating:4, notes:'Practice questions'}
+    ];
+
+    // ─── State ────────────────────────────────────────────────────────
+    const state = {
+      projects: JSON.parse(localStorage.getItem(LS.projects)) || seedProjects,
+      logs: JSON.parse(localStorage.getItem(LS.sessions)) || seedLogs,
+      activeProjectId: localStorage.getItem(LS.activeId) || 'p1',
+      timerRunning: false, timerStartedAt: null, elapsedBeforePause: 0,
+      pendingMs: 0, chart: null, selectedRating: null, manualRating: null, editRating: null
+    };
+
+    function saveState() {
+      localStorage.setItem(LS.projects, JSON.stringify(state.projects));
+      localStorage.setItem(LS.sessions, JSON.stringify(state.logs));
+      if (state.activeProjectId) localStorage.setItem(LS.activeId, state.activeProjectId);
+      else localStorage.removeItem(LS.activeId);
+    }
+
+    // ─── Helpers ──────────────────────────────────────────────────────
+    const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+    const fmtDate = d => new Intl.DateTimeFormat(undefined,{month:'short',day:'numeric'}).format(d);
+    const fmtDateLong = d => new Intl.DateTimeFormat(undefined,{weekday:'short',month:'short',day:'numeric'}).format(d);
+    const fmtTime = d => new Intl.DateTimeFormat(undefined,{hour:'numeric',minute:'2-digit'}).format(d);
+    const fmtDuration = min => min >= 60 ? `${Math.floor(min/60)}h ${min%60}m` : `${min} min`;
+    const stars = r => '★'.repeat(r) + '☆'.repeat(5-r);
+    const now = () => new Date();
+    const ratingLabel = r => ({1:'😞 Not productive',2:'😕 Barely productive',3:'😐 Decent',4:'🙂 Productive',5:'🌟 Very productive'})[r] || '';
+
+    function getActiveProject(){ return state.projects.find(p => p.id === state.activeProjectId) || null; }
+    function getElapsedMs(){ return state.timerRunning ? state.elapsedBeforePause + (Date.now() - state.timerStartedAt) : state.elapsedBeforePause; }
+    function formatClock(ms){ const s=Math.floor(ms/1000), h=String(Math.floor(s/3600)).padStart(2,'0'), m=String(Math.floor((s%3600)/60)).padStart(2,'0'), sec=String(s%60).padStart(2,'0'); return `${h}:${m}:${sec}`; }
+    function isProductive(log){ return (log.rating || 0) >= 4; }
+    function venatoPoints(logs){ return logs.reduce((a,b) => a + (b.durationMin * (b.rating||0)), 0); }
+
+    function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(window._toast); window._toast=setTimeout(()=>t.classList.remove('show'),1900); }
+    function resetSlider(){ $('#slideThumb').style.left='0px'; $('#slideLabel').textContent='Slide to finish and rate'; }
+
+    // ─── Timer controls ───────────────────────────────────────────────
+    function startTimer(){
+      if(!getActiveProject()) return toast('Select a project first');
+      state.timerRunning=true; state.timerStartedAt=Date.now();
+      $('#startPauseBtn').textContent='Pause'; $('#timerState').textContent='Tracking now'; render();
+    }
+    function pauseTimer(){
+      state.timerRunning=false; state.elapsedBeforePause=getElapsedMs(); state.timerStartedAt=null;
+      $('#startPauseBtn').textContent='Resume'; $('#timerState').textContent='Paused'; render();
+    }
+    function resetTimer(){
+      state.timerRunning=false; state.timerStartedAt=null; state.elapsedBeforePause=0;
+      $('#startPauseBtn').textContent='Start session'; $('#timerState').textContent='Ready to focus';
+      resetSlider(); render();
+    }
+
+    // ─── Rating Modal ─────────────────────────────────────────────────
+    function openRatingModal(ms){
+      state.pendingMs = ms;
+      state.selectedRating = null;
+      const min = Math.max(1, Math.round(ms/60000));
+      $('#ratingSessionInfo').textContent = `Session: ${formatClock(ms)} · ${min} min`;
+      $('#sessionNotes').value = '';
+      $('#saveSessionBtn').disabled = true;
+      $$('#ratingRow .rating-btn').forEach(b => b.classList.remove('active'));
+      $('#ratingDesc').textContent = 'Tap a number to rate';
+      $('#ratingModal').classList.add('open');
+    }
+    function closeRatingModal(){ $('#ratingModal').classList.remove('open'); }
+
+    $$('#ratingRow .rating-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const r = Number(btn.dataset.r);
+        state.selectedRating = r;
+        $$('#ratingRow .rating-btn').forEach(b => b.classList.toggle('active', Number(b.dataset.r)===r));
+        $('#ratingDesc').textContent = ratingLabel(r);
+        $('#saveSessionBtn').disabled = false;
+      });
+    });
+
+    $('#saveSessionBtn').addEventListener('click', () => {
+      const ms = state.pendingMs;
+      const rating = state.selectedRating;
+      if (!rating) return;
+      const note = $('#sessionNotes').value.trim();
+      const p = getActiveProject();
+      const end = new Date();
+      const start = new Date(end.getTime() - ms);
+      const min = Math.max(1, Math.round(ms/60000));
+      state.logs.unshift({
+        id: 'l'+Math.random().toString(36).slice(2,9),
+        projectId: p.id, project: p.name, subject: p.subject,
+        start: start.toISOString(), end: end.toISOString(),
+        durationMin: min, rating, notes: note
+      });
+      state.timerRunning=false; state.timerStartedAt=null; state.elapsedBeforePause=0;
+      state.pendingMs=0; state.selectedRating=null;
+      $('#startPauseBtn').textContent='Start session'; $('#timerState').textContent='Ready to focus';
+      resetSlider(); closeRatingModal(); saveState(); render(); toast('Session saved ✓');
+    });
+
+    function finishSession(){
+      const ms = getElapsedMs();
+      if(ms < 60000) return toast('Track at least 1 minute first');
+      if(state.timerRunning){ state.timerRunning=false; state.elapsedBeforePause=ms; state.timerStartedAt=null; }
+      openRatingModal(ms);
+    }
+
+    // ─── Manual Log Modal ─────────────────────────────────────────────
+    function openManualModal(){
+      if(!getActiveProject()) return toast('Select a project first');
+      state.manualRating = null;
+      $('#manualMinutes').value = '45';
+      $('#manualNotes').value = '';
+      $('#saveManualBtn').disabled = true;
+      $$('#manualRatingRow .rating-btn').forEach(b => b.classList.remove('active'));
+      $('#manualModal').classList.add('open');
+    }
+    $('#cancelManualBtn').addEventListener('click', ()=>$('#manualModal').classList.remove('open'));
+    $$('#manualRatingRow .rating-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const r = Number(btn.dataset.mr);
+        state.manualRating = r;
+        $$('#manualRatingRow .rating-btn').forEach(b => b.classList.toggle('active', Number(b.dataset.mr)===r));
+        $('#saveManualBtn').disabled = false;
+      });
+    });
+    $('#saveManualBtn').addEventListener('click', () => {
+      const min = Number($('#manualMinutes').value);
+      if(!min || min < 1) return toast('Enter valid minutes');
+      const rating = state.manualRating;
+      if(!rating) return toast('Select a rating');
+      const note = $('#manualNotes').value.trim();
+      const p = getActiveProject();
+      const end = new Date(); const start = new Date(end.getTime() - min*60000);
+      state.logs.unshift({
+        id: 'l'+Math.random().toString(36).slice(2,9),
+        projectId: p.id, project: p.name, subject: p.subject,
+        start: start.toISOString(), end: end.toISOString(),
+        durationMin: min, rating, notes: note
+      });
+      $('#manualModal').classList.remove('open');
+      saveState(); render(); toast('Log added ✓');
+    });
+
+    // ─── Edit Session Modal ───────────────────────────────────────────
+    function openEditModal(log){
+      state.editRating = log.rating;
+      $('#editSessionId').value = log.id;
+      $('#editMinutes').value = log.durationMin;
+      $('#editNotes').value = log.notes || '';
+      $$('#editRatingRow .rating-btn').forEach(b => b.classList.toggle('active', Number(b.dataset.er)===log.rating));
+      $('#editModal').classList.add('open');
+    }
+    $('#cancelEditBtn').addEventListener('click', ()=>$('#editModal').classList.remove('open'));
+    $$('#editRatingRow .rating-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const r = Number(btn.dataset.er);
+        state.editRating = r;
+        $$('#editRatingRow .rating-btn').forEach(b => b.classList.toggle('active', Number(b.dataset.er)===r));
+      });
+    });
+    $('#saveEditBtn').addEventListener('click', () => {
+      const id = $('#editSessionId').value;
+      const log = state.logs.find(l=>l.id===id); if(!log) return;
+      const min = Number($('#editMinutes').value);
+      if(!min || min<1) return toast('Enter valid minutes');
+      log.durationMin = min;
+      log.rating = state.editRating || log.rating;
+      log.notes = $('#editNotes').value.trim();
+      const end = new Date(log.end); log.start = new Date(end.getTime()-min*60000).toISOString();
+      $('#editModal').classList.remove('open');
+      saveState(); render(); toast('Session updated ✓');
+    });
+    $('#deleteSessionBtn').addEventListener('click', () => {
+      const id = $('#editSessionId').value;
+      state.logs = state.logs.filter(l=>l.id!==id);
+      $('#editModal').classList.remove('open');
+      saveState(); render(); toast('Session deleted');
+    });
+
+    // ─── JSON Export ──────────────────────────────────────────────────
+    function exportJSON(){
+      const today = new Date().toISOString().slice(0,10);
+      const totalMinutes = state.logs.reduce((a,b)=>a+b.durationMin,0);
+      const productiveMinutes = state.logs.filter(l=>isProductive(l)).reduce((a,b)=>a+b.durationMin,0);
+      const nonproductiveMinutes = Math.max(0, totalMinutes - productiveMinutes);
+      const avgRating = state.logs.length ? (state.logs.reduce((a,b)=>a+(b.rating||0),0)/state.logs.length) : 0;
+      const data = {
+        version:1, source:'venato-study-tracker',
+        exportedAt: new Date().toISOString(),
+        sessions: state.logs, projects: state.projects,
+        summary: {
+          totalMinutes, productiveMinutes, nonproductiveMinutes,
+          averageRating: Math.round(avgRating*100)/100,
+          sessionCount: state.logs.length
+        },
+        venatoPoints: venatoPoints(state.logs)
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `venato_study_export_${today}.json`;
+      a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+      toast('JSON exported ✓');
+    }
+
+    // ─── Render helpers ───────────────────────────────────────────────
+    function totalToday(){ const t=new Date().toISOString().slice(0,10); return state.logs.filter(l=>l.start.slice(0,10)===t).reduce((a,b)=>a+b.durationMin,0); }
+    function productiveToday(){ const t=new Date().toISOString().slice(0,10); return state.logs.filter(l=>l.start.slice(0,10)===t && isProductive(l)).reduce((a,b)=>a+b.durationMin,0); }
+
+    function renderHero(){
+      const p=getActiveProject();
+      const total = p ? state.logs.filter(l=>l.projectId===p.id).reduce((a,b)=>a+b.durationMin,0) : 0;
+      $('#heroProjectStatus').textContent = p ? `Active · ${p.subject}` : 'No active project';
+      $('#heroEstimate').textContent = p ? `${total}/${p.estimate} min` : 'No estimate yet';
+      $('#heroTask').textContent = p ? p.name : 'Start a study session';
+      $('#heroSubject').textContent = p ? `Estimated total ${p.estimate} min` : 'Choose a project below or create one in Projects.';
+      $('#todayMinutes').textContent = fmtDuration(totalToday());
+      $('#todayProductive').textContent = fmtDuration(productiveToday());
+      $('#timerDisplay').textContent = formatClock(getElapsedMs());
+      $('#timerRing').style.setProperty('--progress', Math.min(100,(getElapsedMs()/(60*60*1000))*100));
+      if(!state.timerRunning && state.elapsedBeforePause===0) $('#timerState').textContent='Ready to focus';
+    }
+
+    function renderProjectCards(target, compact=false){
+      const box=$(target); box.innerHTML='';
+      if(!state.projects.length){ box.innerHTML='<div class="empty-state"><h3>No projects yet</h3><p>Add a project to start tracking.</p></div>'; return; }
+      state.projects.forEach(p=>{
+        const logs=state.logs.filter(l=>l.projectId===p.id);
+        const actual=logs.reduce((a,b)=>a+b.durationMin,0);
+        const productive=logs.filter(l=>isProductive(l)).reduce((a,b)=>a+b.durationMin,0);
+        const diff=actual-p.estimate;
+        const bonusPts=Math.max(0, p.estimate-actual);
+        const el=document.createElement('div');
+        el.className=`card ${compact?'project-card':'goal-card'} ${state.activeProjectId===p.id?'active-project':''}`;
+        el.innerHTML=`<div class="project-top"><div><div class="project-name">${p.name}</div><div class="meta-row"><span>${p.subject}</span><span>Est. ${p.estimate} min</span></div></div><span class="badge ${diff<=0?'primary':'accent'}">${diff===0?'On estimate':diff<0?`${Math.abs(diff)}m under`:`${diff}m over`}</span></div><div class="goal-meta" style="margin-top:10px"><span>Actual ${actual} min</span><span>Productive ${productive} min</span><span>${bonusPts>0?`+${bonusPts} bonus pts`:''}</span></div>${compact?'':`<div class="goal-actions"><button class="ghost-btn" data-select="${p.id}">Set active</button><button class="ghost-btn" data-edit-est="${p.id}">Edit estimate</button><button class="ghost-btn" data-delete="${p.id}">Delete</button></div>`}`;
+        if(compact){ el.addEventListener('click',()=>{state.activeProjectId=p.id; saveState(); render(); toast(`${p.name} selected`);}); }
+        box.appendChild(el);
+      });
+      box.querySelectorAll('[data-select]').forEach(b=>b.onclick=()=>{state.activeProjectId=b.dataset.select; saveState(); render(); toast('Active project updated');});
+      box.querySelectorAll('[data-edit-est]').forEach(b=>b.onclick=()=>{
+        const p=state.projects.find(x=>x.id===b.dataset.editEst);
+        const n=Number(window.prompt('New estimate minutes', p.estimate));
+        if(!n||n<1) return; p.estimate=n; saveState(); render(); toast('Estimate updated');
+      });
+      box.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>{
+        if(!confirm('Delete this project and all its sessions?')) return;
+        state.projects=state.projects.filter(p=>p.id!==b.dataset.delete);
+        if(state.activeProjectId===b.dataset.delete) state.activeProjectId=state.projects[0]?.id||null;
+        state.logs=state.logs.filter(l=>l.projectId!==b.dataset.delete);
+        saveState(); render(); toast('Project deleted');
+      });
+    }
+
+    function renderHistory(){
+      const box=$('#historyList'); box.innerHTML='';
+      if(!state.logs.length){ box.innerHTML='<div class="empty-state"><h3>No sessions yet</h3><p>Finished sessions will appear here.</p></div>'; return; }
+      state.logs.forEach(l=>{
+        const s=new Date(l.start), e=new Date(l.end);
+        const el=document.createElement('div'); el.className='card history-card';
+        el.innerHTML=`<div class="history-top"><div><div class="history-name">${l.project}</div><div class="meta-row"><span>${l.subject}</span><span>${fmtDateLong(s)}</span><span>${fmtTime(s)}–${fmtTime(e)}</span></div></div><span class="badge ${isProductive(l)?'primary':'accent'}">${stars(l.rating||0)}</span></div><div class="goal-meta" style="margin-top:8px"><span>${fmtDuration(l.durationMin)}</span><span>${isProductive(l)?'Productive':'Not productive'}</span><span style="color:var(--color-text-faint)">${l.notes||'No notes'}</span></div><div class="history-actions"><button class="ghost-btn" data-edit-session="${l.id}">Edit</button></div>`;
+        box.appendChild(el);
+      });
+      box.querySelectorAll('[data-edit-session]').forEach(b=>b.onclick=()=>{
+        const log=state.logs.find(l=>l.id===b.dataset.editSession);
+        if(log) openEditModal(log);
+      });
+    }
+
+    function renderStats(){
+      const total=state.logs.reduce((a,b)=>a+b.durationMin,0);
+      const productive=state.logs.filter(l=>isProductive(l)).reduce((a,b)=>a+b.durationMin,0);
+      const nonproductive=Math.max(0,total-productive);
+      const pct=total>0?Math.round(productive/total*100):0;
+      const avg=state.logs.length?(state.logs.reduce((a,b)=>a+(b.rating||0),0)/state.logs.length):0;
+      const weekAgo=new Date(Date.now()-7*24*60*60*1000).toISOString();
+      const thisWeek=state.logs.filter(l=>l.start>=weekAgo).reduce((a,b)=>a+b.durationMin,0);
+      const pts=venatoPoints(state.logs);
+      $('#statTotal').textContent=fmtDuration(total);
+      $('#statProductive').textContent=fmtDuration(productive);
+      $('#statNonproductive').textContent=fmtDuration(nonproductive);
+      $('#statPct').textContent=pct+'%';
+      $('#avgRating').textContent=avg.toFixed(1);
+      $('#statsSessions').textContent=state.logs.length;
+      $('#statWeek').textContent=fmtDuration(thisWeek);
+      $('#statPoints').textContent=pts.toLocaleString();
+
+      // Chart
+      const ctx=$('#statsChart');
+      if(state.chart) state.chart.destroy();
+      state.chart=new Chart(ctx,{type:'doughnut',data:{labels:['Productive','Not Productive'],datasets:[{data:[productive,nonproductive],backgroundColor:['#3d6b4f','#8b3a3a'],borderWidth:0}]},options:{plugins:{legend:{position:'bottom'}}}});
+
+      // Subject table
+      const subjects={};
+      state.logs.forEach(l=>{
+        if(!subjects[l.subject]) subjects[l.subject]={total:0,productive:0};
+        subjects[l.subject].total+=l.durationMin;
+        if(isProductive(l)) subjects[l.subject].productive+=l.durationMin;
+      });
+      const tbody=$('#subjectTableBody'); tbody.innerHTML='';
+      Object.entries(subjects).sort((a,b)=>b[1].total-a[1].total).forEach(([sub,v])=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${sub}</td><td>${fmtDuration(v.total)}</td><td>${fmtDuration(v.productive)}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      // Project stats
+      const box=$('#projectStatsList'); box.innerHTML='';
+      state.projects.forEach(p=>{
+        const logs=state.logs.filter(l=>l.projectId===p.id);
+        const tot=logs.reduce((a,b)=>a+b.durationMin,0);
+        const prod=logs.filter(l=>isProductive(l)).reduce((a,b)=>a+b.durationMin,0);
+        const avg2=logs.length?(logs.reduce((a,b)=>a+b.rating,0)/logs.length).toFixed(1):'0.0';
+        const el=document.createElement('div'); el.className='card project-card';
+        el.innerHTML=`<div class="project-top"><div><div class="project-name">${p.name}</div><div class="meta-row"><span>${p.subject}</span><span>Avg ${avg2}/5</span></div></div><span class="badge primary">${prod} productive</span></div><div class="goal-meta" style="margin-top:8px"><span>${Math.max(0,tot-prod)} nonproductive</span><span>${tot} total min</span></div>`;
+        box.appendChild(el);
+      });
+    }
+
+    function render(){
+      $('#header-date').textContent=fmtDate(now());
+      renderHero(); renderProjectCards('#todayProjectList',true);
+      renderProjectCards('#projectList',false); renderHistory(); renderStats();
+    }
+
+    // ─── Button wiring ────────────────────────────────────────────────
+    $('#startPauseBtn').addEventListener('click',()=>{ if(state.timerRunning) pauseTimer(); else startTimer(); });
+    $('#resetBtn').addEventListener('click',()=>{ if(state.timerRunning || state.elapsedBeforePause>0){ resetTimer(); } });
+    $('#manualAddBtn').addEventListener('click', openManualModal);
+    $('#exportJsonBtn').addEventListener('click', exportJSON);
+
+    $('#addProjectBtn').addEventListener('click',()=>{
+      const name=$('#projectName').value.trim(), subject=$('#projectSubject').value.trim(), estimate=Number($('#projectEstimate').value)||0;
+      if(!name||!subject||estimate<1) return toast('Fill in name, subject, and estimate');
+      const p={id:'p'+Math.random().toString(36).slice(2,8), name, subject, estimate};
+      state.projects.unshift(p); state.activeProjectId=p.id;
+      $('#projectName').value=''; $('#projectSubject').value=''; $('#projectEstimate').value='180';
+      saveState(); render(); toast('Project added ✓');
+    });
+
+    $$('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>{
+      $$('.nav-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+      $$('.page').forEach(p=>p.classList.remove('active')); $('#page-'+btn.dataset.target).classList.add('active');
+    }));
+
+    // ─── Slide-to-finish ──────────────────────────────────────────────
+    const slideTrack=$('#slideTrack'), slideThumb=$('#slideThumb');
+    let dragging=false, startX=0, startLeft=0;
+    const maxLeft=()=>slideTrack.clientWidth-slideThumb.offsetWidth;
+    function setLeft(x){ const left=Math.max(0,Math.min(maxLeft(),x)); slideThumb.style.left=left+'px'; $('#slideLabel').textContent=(left/maxLeft())>.72?'Release to save':'Slide to finish and rate'; }
+    function pointerDown(clientX){ if(!state.timerRunning && state.elapsedBeforePause===0){ toast('Start a session first'); return; } dragging=true; startX=clientX; startLeft=parseFloat(slideThumb.style.left||'0')||0; slideThumb.style.transition='none'; }
+    function pointerMove(clientX){ if(!dragging) return; setLeft(startLeft+clientX-startX); }
+    function pointerUp(){ if(!dragging) return; dragging=false; const left=parseFloat(slideThumb.style.left||'0')||0; slideThumb.style.transition='left 180ms cubic-bezier(0.16,1,0.3,1)'; if(left>=maxLeft()*0.86){ slideThumb.style.left=maxLeft()+'px'; setTimeout(finishSession,120); } else resetSlider(); }
+    slideThumb.addEventListener('pointerdown',e=>{ slideThumb.setPointerCapture(e.pointerId); pointerDown(e.clientX); });
+    slideThumb.addEventListener('pointermove',e=>pointerMove(e.clientX));
+    slideThumb.addEventListener('pointerup',pointerUp);
+    slideThumb.addEventListener('pointercancel',pointerUp);
+    slideThumb.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); if(state.timerRunning||state.elapsedBeforePause>0) finishSession(); }});
+
+    // ─── Timer tick ───────────────────────────────────────────────────
+    setInterval(()=>{ if(state.timerRunning) renderHero(); }, 1000);
+
+    // ─── Close modals on overlay tap ─────────────────────────────────
+    ['ratingModal'].forEach(id=>{
+      $('#'+id).addEventListener('click', e=>{ if(e.target.id===id) { /* Don't close rating modal — user must rate */ }});
+    });
+
+    render();
+  </script>
+
+  <script>
+    // ── Service Worker registration ──────────────────────────────────
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW reg failed:', err));
+      });
+    }
+
+    // ── Wake Lock: keep screen on during active session ──────────────
+    let _wakeLock = null;
+    async function requestWakeLock() {
+      if ('wakeLock' in navigator) {
+        try { _wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+      }
+    }
+    async function releaseWakeLock() {
+      if (_wakeLock) { try { await _wakeLock.release(); } catch(e) {} _wakeLock = null; }
+    }
+    // Re-acquire wake lock when tab becomes visible again
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && state.timerRunning) requestWakeLock();
+    });
+
+    // ── Patch startTimer / pauseTimer / resetTimer for wake lock ─────
+    const _origStart = startTimer;
+    startTimer = function() { _origStart(); requestWakeLock(); };
+    const _origPause = pauseTimer;
+    pauseTimer = function() { _origPause(); releaseWakeLock(); };
+    const _origReset = resetTimer;
+    resetTimer = function() { _origReset(); releaseWakeLock(); };
+
+    // ── Persist timer across screen-off / tab-hide events ────────────
+    // The timer already uses Date.now() anchoring (timerStartedAt),
+    // so elapsed time is always computed from wall clock — not tick count.
+    // We just need to persist that anchor across page reloads / SW restarts.
+    const LS_TIMER = { running:'venato_timer_running', startedAt:'venato_timer_started_at', elapsed:'venato_timer_elapsed' };
+
+    function saveTimerState() {
+      localStorage.setItem(LS_TIMER.running, state.timerRunning ? '1' : '0');
+      localStorage.setItem(LS_TIMER.startedAt, state.timerStartedAt || '');
+      localStorage.setItem(LS_TIMER.elapsed, state.elapsedBeforePause || 0);
+    }
+
+    function restoreTimerState() {
+      const running = localStorage.getItem(LS_TIMER.running) === '1';
+      const startedAt = Number(localStorage.getItem(LS_TIMER.startedAt));
+      const elapsed = Number(localStorage.getItem(LS_TIMER.elapsed)) || 0;
+      if (running && startedAt) {
+        state.timerRunning = true;
+        state.timerStartedAt = startedAt;
+        state.elapsedBeforePause = elapsed;
+        if (typeof render === 'function') render();
+        requestWakeLock();
+      }
+    }
+
+    // Save timer state on every tick and on page hide
+    const _origInterval = setInterval;
+    window.addEventListener('DOMContentLoaded', () => {
+      restoreTimerState();
+    });
+    document.addEventListener('visibilitychange', () => {
+      saveTimerState();
+    });
+    window.addEventListener('pagehide', saveTimerState);
+    // Patch the existing 1s interval by monkey-patching saveState
+    const _origSaveState = saveState;
+    saveState = function() { _origSaveState(); saveTimerState(); };
+  </script>
+</body>
+</html>
