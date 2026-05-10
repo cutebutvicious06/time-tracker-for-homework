@@ -264,7 +264,7 @@
     function getActiveProject(){ return state.projects.find(p => p.id === state.activeProjectId) || null; }
     function getElapsedMs(){ return state.timerRunning ? state.elapsedBeforePause + (Date.now() - state.timerStartedAt) : state.elapsedBeforePause; }
     function formatClock(ms){ const s=Math.floor(ms/1000), h=String(Math.floor(s/3600)).padStart(2,'0'), m=String(Math.floor((s%3600)/60)).padStart(2,'0'), sec=String(s%60).padStart(2,'0'); return `${h}:${m}:${sec}`; }
-    function isProductive(log){ return (log.rating || 0) >= 4; }
+    function isProductive(log){ return (log.rating || 0) >= 3; }
     function venatoPoints(logs){ return logs.reduce((a,b) => a + (b.durationMin * (b.rating||0)), 0); }
 
     function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(window._toast); window._toast=setTimeout(()=>t.classList.remove('show'),1900); }
